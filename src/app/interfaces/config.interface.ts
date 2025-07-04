@@ -143,6 +143,30 @@ export interface AppConfig {
     paypal?: boolean;
     moyasar?: boolean;
   };
+
+  // Security Configuration
+  security?: {
+    enableCsrf?: boolean;
+    enableRateLimit?: boolean;
+    sessionTimeout?: number;
+    maxLoginAttempts?: number;
+  };
+
+  // Performance Configuration
+  performance?: {
+    enableCaching?: boolean;
+    cacheTimeout?: number;
+    enableImageOptimization?: boolean;
+    enableLazyLoading?: boolean;
+  };
+
+  // Analytics Configuration
+  analytics?: {
+    enableGoogleAnalytics?: boolean;
+    googleAnalyticsId?: string;
+    enableFacebookPixel?: boolean;
+    facebookPixelId?: string;
+  };
 }
 
 // Default configuration

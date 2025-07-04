@@ -160,6 +160,60 @@ import { LanguageService } from '../../services/language.service';
           </ion-item>
         </ion-item-group>
 
+        <!-- Security Settings -->
+        <ion-item-group *ngIf="config?.security">
+          <ion-item-divider>
+            <ion-label>{{ 'SECURITY' | translate }}</ion-label>
+          </ion-item-divider>
+
+          <ion-item>
+            <ion-icon name="shield-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'SECURITY_SETTINGS' | translate }}</h3>
+              <p>{{ 'CSRF Protection' | translate }}: {{ config.security.enableCsrf ? 'Enabled' : 'Disabled' }}</p>
+              <p>{{ 'Rate Limiting' | translate }}: {{ config.security.enableRateLimit ? 'Enabled' : 'Disabled' }}</p>
+              <p>{{ 'Session Timeout' | translate }}: {{ config.security.sessionTimeout }}s</p>
+              <p>{{ 'Max Login Attempts' | translate }}: {{ config.security.maxLoginAttempts }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-item-group>
+
+        <!-- Performance Settings -->
+        <ion-item-group *ngIf="config?.performance">
+          <ion-item-divider>
+            <ion-label>{{ 'PERFORMANCE' | translate }}</ion-label>
+          </ion-item-divider>
+
+          <ion-item>
+            <ion-icon name="speedometer-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'PERFORMANCE_SETTINGS' | translate }}</h3>
+              <p>{{ 'Caching' | translate }}: {{ config.performance.enableCaching ? 'Enabled' : 'Disabled' }}</p>
+              <p>{{ 'Cache Timeout' | translate }}: {{ config.performance.cacheTimeout }}s</p>
+              <p>{{ 'Image Optimization' | translate }}: {{ config.performance.enableImageOptimization ? 'Enabled' : 'Disabled' }}</p>
+              <p>{{ 'Lazy Loading' | translate }}: {{ config.performance.enableLazyLoading ? 'Enabled' : 'Disabled' }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-item-group>
+
+        <!-- Analytics Settings -->
+        <ion-item-group *ngIf="config?.analytics">
+          <ion-item-divider>
+            <ion-label>{{ 'ANALYTICS' | translate }}</ion-label>
+          </ion-item-divider>
+
+          <ion-item>
+            <ion-icon name="analytics-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'ANALYTICS_SETTINGS' | translate }}</h3>
+              <p>{{ 'Google Analytics' | translate }}: {{ config.analytics.enableGoogleAnalytics ? 'Enabled' : 'Disabled' }}</p>
+              <p>{{ 'Facebook Pixel' | translate }}: {{ config.analytics.enableFacebookPixel ? 'Enabled' : 'Disabled' }}</p>
+              <p *ngIf="config.analytics.googleAnalyticsId">{{ 'GA ID' | translate }}: {{ config.analytics.googleAnalyticsId }}</p>
+              <p *ngIf="config.analytics.facebookPixelId">{{ 'FB Pixel ID' | translate }}: {{ config.analytics.facebookPixelId }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-item-group>
+
         <!-- Configuration Management -->
         <ion-item-group>
           <ion-item-divider>

@@ -59,7 +59,10 @@ export class AppComponent implements OnInit, OnDestroy {
     public languageService: LanguageService, // Language service for internationalization
     private translate: TranslateService, // Translation service
     private configService: ConfigService, // Add ConfigService
-    private configUsageService: ConfigUsageService // Inject ConfigUsageService
+    private configUsageService: ConfigUsageService, // Inject ConfigUsageService
+    private securityService: SecurityService,
+    private performanceService: PerformanceService,
+    private analyticsService: AnalyticsService
   ) {
     // Initialize storage first
     this.storage.create().then(() => {

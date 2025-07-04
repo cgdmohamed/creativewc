@@ -180,6 +180,30 @@ export class ConfigService {
       // Development
       useDemoData: unifiedConfig.development?.useDemoData || false,
 
+      // Security Configuration
+      security: {
+        enableCsrf: unifiedConfig.security?.enableCsrf !== false,
+        enableRateLimit: unifiedConfig.security?.enableRateLimit !== false,
+        sessionTimeout: unifiedConfig.security?.sessionTimeout || 3600,
+        maxLoginAttempts: unifiedConfig.security?.maxLoginAttempts || 5
+      },
+
+      // Performance Configuration
+      performance: {
+        enableCaching: unifiedConfig.performance?.enableCaching !== false,
+        cacheTimeout: unifiedConfig.performance?.cacheTimeout || 300,
+        enableImageOptimization: unifiedConfig.performance?.enableImageOptimization !== false,
+        enableLazyLoading: unifiedConfig.performance?.enableLazyLoading !== false
+      },
+
+      // Analytics Configuration
+      analytics: {
+        enableGoogleAnalytics: unifiedConfig.analytics?.enableGoogleAnalytics || false,
+        googleAnalyticsId: unifiedConfig.analytics?.googleAnalyticsId || '',
+        enableFacebookPixel: unifiedConfig.analytics?.enableFacebookPixel || false,
+        facebookPixelId: unifiedConfig.analytics?.facebookPixelId || ''
+      },
+
       // Legacy fields for backward compatibility
       stripePublishableKey: unifiedConfig.payment?.gateways?.stripe?.publishableKey || '',
       stripeSecretKey: unifiedConfig.payment?.gateways?.stripe?.secretKey || '',
