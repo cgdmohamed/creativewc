@@ -1,39 +1,34 @@
-
 export interface AppConfig {
-  // Basic Configuration
-  appName: string;
-  storeName: string;
+  // Store Configuration
   storeUrl: string;
-  
-  // API Configuration
   apiUrl: string;
   consumerKey: string;
   consumerSecret: string;
-  
-  // WordPress Configuration
+  storeName: string;
+  storeDescription: string;
   wordpressUrl: string;
-  
-  // Payment Gateways
-  moyasarPublishableKey: string;
-  moyasarSecretKey?: string;
-  
-  // Authentication
   authCode: string;
   jwtAuthUrl: string;
-  
-  // Notifications
-  oneSignalAppId: string;
-  
-  // SMS Service
   taqnyatApiKey: string;
-  
-  // Demo Settings
-  useDemoData: boolean;
-  useDemoPayments: boolean;
-  allowDemoCheckout: boolean;
-  
-  // Payment Gateway Settings
+  oneSignalAppId: string;
+
+  // App Branding
+  appName: string;
+  appSlogan: string;
+  primaryColor: string;
+  secondaryColor: string;
+  logoUrl: string;
+  splashScreenUrl: string;
+
+  // Features
   enabledPaymentGateways: string[];
+  defaultCurrency: string;
+  defaultLanguage: string;
+  supportedLanguages: string[];
+  taxRate: number;
+  shippingEnabled: boolean;
+
+  // Payment Gateway Configuration
   paymentGateways?: {
     stripe?: {
       publishableKey: string;
@@ -49,11 +44,37 @@ export interface AppConfig {
       publishableKey: string;
       secretKey: string;
     };
+    stcpay?: {
+      merchantId: string;
+      apiKey: string;
+      environment: 'test' | 'production';
+    };
   };
-  
-  // Backward compatibility
+
+  // Legacy payment config for backward compatibility
   stripePublishableKey?: string;
   stripeSecretKey?: string;
   paypalClientId?: string;
   paypalClientSecret?: string;
+  moyasarPublishableKey?: string;
+  moyasarSecretKey?: string;
+  authToken?: string;
+
+  // SMS Provider Configuration
+  smsProviders?: string[];
+  defaultSmsProvider?: string;
+  twilioConfig?: TwilioConfig;
+  firebaseConfig?: FirebaseConfig;
+  messageBirdConfig?: MessageBirdConfig;
+  vonageConfig?: VonageConfig;
+  awsConfig?: AwsConfig;
+  taqnyatConfig?: TaqnyatConfig;
+
+  // Regional Settings
+  countryCode: string;
+  timezone: string;
+  dateFormat: string;
+
+  // Demo Mode
+  useDemoData: boolean;
 }

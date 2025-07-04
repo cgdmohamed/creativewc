@@ -49,10 +49,7 @@ const routes: Routes = [
     path: 'categories',
     loadChildren: () => import('./pages/categories/categories.module').then(m => m.CategoriesPageModule)
   },
-  {
-    path: 'setup-wizard',
-    loadComponent: () => import('./pages/setup-wizard/setup-wizard.page').then(m => m.SetupWizardPage)
-  },
+  
   {
     path: 'settings',
     loadChildren: () => import('./pages/settings/settings.module').then(m => m.SettingsPageModule),

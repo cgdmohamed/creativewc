@@ -1,127 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-// SMS Provider Configuration Interfaces
-export interface TwilioConfig {
-  accountSid: string;
-  authToken: string;
-  phoneNumber: string;
-}
-
-export interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-}
-
-export interface MessageBirdConfig {
-  apiKey: string;
-  sender: string;
-}
-
-export interface VonageConfig {
-  apiKey: string;
-  apiSecret: string;
-  phoneNumber: string;
-}
-
-export interface AwsConfig {
-  accessKeyId: string;
-  secretAccessKey: string;
-  region: string;
-  sender: string;
-}
-
-export interface TaqnyatConfig {
-  apiKey: string;
-  sender: string;
-}
-
-// Payment Gateway Configuration Interface
-export interface PaymentGatewayConfig {
-  stripe?: {
-    publishableKey: string;
-    secretKey: string;
-    webhookSecret?: string;
-  };
-  paypal?: {
-    clientId: string;
-    clientSecret: string;
-    environment: 'sandbox' | 'live';
-  };
-  moyasar?: {
-    publishableKey: string;
-    secretKey: string;
-  };
-  stcpay?: {
-    merchantId: string;
-    apiKey: string;
-    environment: 'test' | 'production';
-  };
-}
-
-// Main App Configuration Interface
-export interface AppConfig {
-  // Store Configuration
-  storeUrl: string;
-  apiUrl: string;
-  consumerKey: string;
-  consumerSecret: string;
-  storeName: string;
-  storeDescription: string;
-  
-  // App Branding
-  appName: string;
-  appSlogan: string;
-  primaryColor: string;
-  secondaryColor: string;
-  logoUrl: string;
-  splashScreenUrl: string;
-  
-  // Features
-  enabledPaymentGateways: string[];
-  defaultCurrency: string;
-  defaultLanguage: string;
-  supportedLanguages: string[];
-  taxRate: number;
-  shippingEnabled: boolean;
-  
-  // Payment Gateway Configuration
-  paymentGateways?: PaymentGatewayConfig;
-  
-  // Legacy payment config for backward compatibility
-  stripePublishableKey?: string;
-  stripeSecretKey?: string;
-  paypalClientId?: string;
-  paypalClientSecret?: string;
-  moyasarPublishableKey?: string;
-  moyasarSecretKey?: string;
-  authToken?: string;
-  
-  // SMS Provider Configuration
-  smsProviders?: string[];
-  defaultSmsProvider?: string;
-  twilioConfig?: TwilioConfig;
-  firebaseConfig?: FirebaseConfig;
-  messageBirdConfig?: MessageBirdConfig;
-  vonageConfig?: VonageConfig;
-  awsConfig?: AwsConfig;
-  taqnyatConfig?: TaqnyatConfig;
-  
-  // OneSignal Configuration
-  oneSignalAppId?: string;
-  
-  // Regional Settings
-  countryCode: string;
-  timezone: string;
-  dateFormat: string;
-  
-  // Demo Mode
-  useDemoData: boolean;
-}
+import { AppConfig } from '../interfaces/config.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -129,7 +8,7 @@ export interface AppConfig {
 export class ConfigService {
   private config: AppConfig;
   private configSubject = new BehaviorSubject<AppConfig | null>(null);
-  
+
   constructor() {
     this.loadConfig();
   }
@@ -139,7 +18,7 @@ export class ConfigService {
    */
   private loadConfig(): void {
     const savedConfig = localStorage.getItem('app-config');
-    
+
     if (savedConfig) {
       try {
         this.config = JSON.parse(savedConfig);
@@ -150,7 +29,7 @@ export class ConfigService {
     } else {
       this.config = this.getDefaultConfig();
     }
-    
+
     this.configSubject.next(this.config);
   }
 
@@ -180,7 +59,7 @@ export class ConfigService {
   /**
    * Save configuration to localStorage
    */
-  private saveConfig(): void {
+  saveConfig(): void {
     try {
       localStorage.setItem('app-config', JSON.stringify(this.config));
     } catch (error) {
@@ -209,7 +88,12 @@ export class ConfigService {
       consumerSecret: '',
       storeName: 'Your Store Name',
       storeDescription: 'Your Store Description',
-      
+      wordpressUrl: 'https://your-store.com',
+      authCode: '',
+      jwtAuthUrl: 'https://your-store.com/wp-json/simple-jwt-login/v1',
+      taqnyatApiKey: '',
+      oneSignalAppId: '',
+
       // App Branding
       appName: 'Your App Name',
       appSlogan: 'Your App Slogan',
@@ -217,7 +101,7 @@ export class ConfigService {
       secondaryColor: '#3dc2ff',
       logoUrl: 'assets/logo.png',
       splashScreenUrl: 'assets/splash.png',
-      
+
       // Features
       enabledPaymentGateways: ['stripe', 'paypal'],
       defaultCurrency: 'USD',
@@ -225,8 +109,8 @@ export class ConfigService {
       supportedLanguages: ['en', 'ar', 'es', 'fr', 'de'],
       taxRate: 0.0,
       shippingEnabled: true,
-      
-      // Payment Gateway Configuration (new structure)
+
+      // Payment Gateway Configuration
       paymentGateways: {
         stripe: {
           publishableKey: '',
@@ -248,7 +132,7 @@ export class ConfigService {
           environment: 'test'
         }
       },
-      
+
       // Legacy payment config (for backward compatibility)
       stripePublishableKey: '',
       stripeSecretKey: '',
@@ -257,7 +141,7 @@ export class ConfigService {
       moyasarPublishableKey: '',
       moyasarSecretKey: '',
       authToken: '',
-      
+
       // SMS Provider Configuration
       smsProviders: ['twilio'],
       defaultSmsProvider: 'twilio',
@@ -293,15 +177,12 @@ export class ConfigService {
         apiKey: '',
         sender: ''
       },
-      
-      // OneSignal Configuration
-      oneSignalAppId: '',
-      
+
       // Regional Settings
       countryCode: 'US',
       timezone: 'America/New_York',
       dateFormat: 'MM/DD/YYYY',
-      
+
       // Demo Mode
       useDemoData: false
     };
@@ -312,59 +193,29 @@ export class ConfigService {
    */
   validateConfig(): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     // Validate store configuration
     if (!this.config.storeUrl) {
       errors.push('Store URL is required');
     }
-    
+
     if (!this.config.apiUrl) {
       errors.push('API URL is required');
     }
-    
+
     if (!this.config.consumerKey) {
       errors.push('Consumer Key is required');
     }
-    
+
     if (!this.config.consumerSecret) {
       errors.push('Consumer Secret is required');
     }
-    
+
     // Validate payment gateways
     if (this.config.enabledPaymentGateways.length === 0) {
       errors.push('At least one payment gateway must be enabled');
     }
-    
-    // Validate enabled payment gateways configuration
-    this.config.enabledPaymentGateways.forEach(gateway => {
-      switch (gateway) {
-        case 'stripe':
-          if (!this.getStripeConfig().publishableKey) {
-            errors.push('Stripe publishable key is required');
-          }
-          if (!this.getStripeConfig().secretKey) {
-            errors.push('Stripe secret key is required');
-          }
-          break;
-        case 'paypal':
-          if (!this.getPayPalConfig().clientId) {
-            errors.push('PayPal client ID is required');
-          }
-          if (!this.getPayPalConfig().clientSecret) {
-            errors.push('PayPal client secret is required');
-          }
-          break;
-        case 'moyasar':
-          if (!this.getMoyasarConfig().publishableKey) {
-            errors.push('Moyasar publishable key is required');
-          }
-          if (!this.getMoyasarConfig().secretKey) {
-            errors.push('Moyasar secret key is required');
-          }
-          break;
-      }
-    });
-    
+
     return {
       isValid: errors.length === 0,
       errors
@@ -415,159 +266,6 @@ export class ConfigService {
   }
 
   /**
-   * Get SMS provider configuration
-   */
-  getSMSProviderConfig(provider: string): any {
-    switch (provider) {
-      case 'twilio':
-        return this.config.twilioConfig;
-      case 'firebase':
-        return this.config.firebaseConfig;
-      case 'messagebird':
-        return this.config.messageBirdConfig;
-      case 'vonage':
-        return this.config.vonageConfig;
-      case 'aws':
-        return this.config.awsConfig;
-      case 'taqnyat':
-        return this.config.taqnyatConfig;
-      default:
-        return null;
-    }
-  }
-
-  /**
-   * Update payment gateway configuration
-   */
-  updatePaymentGateway(gateway: string, config: any): void {
-    if (!this.config.paymentGateways) {
-      this.config.paymentGateways = {};
-    }
-    
-    this.config.paymentGateways[gateway as keyof PaymentGatewayConfig] = config;
-    this.saveConfig();
-    this.configSubject.next(this.config);
-  }
-
-  /**
-   * Update SMS provider configuration
-   */
-  updateSMSProvider(provider: string, config: any): void {
-    switch (provider) {
-      case 'twilio':
-        this.config.twilioConfig = config;
-        break;
-      case 'firebase':
-        this.config.firebaseConfig = config;
-        break;
-      case 'messagebird':
-        this.config.messageBirdConfig = config;
-        break;
-      case 'vonage':
-        this.config.vonageConfig = config;
-        break;
-      case 'aws':
-        this.config.awsConfig = config;
-        break;
-      case 'taqnyat':
-        this.config.taqnyatConfig = config;
-        break;
-    }
-    
-    this.saveConfig();
-    this.configSubject.next(this.config);
-  }
-
-  /**
-   * Test store connection
-   */
-  async testStoreConnection(): Promise<{ success: boolean; message: string }> {
-    try {
-      const response = await fetch(`${this.config.storeUrl}/wp-json/wc/v3/system_status`, {
-        headers: {
-          'Authorization': `Basic ${btoa(`${this.config.consumerKey}:${this.config.consumerSecret}`)}`
-        }
-      });
-
-      if (response.ok) {
-        return { success: true, message: 'Store connection successful' };
-      } else {
-        return { success: false, message: `Connection failed: ${response.status}` };
-      }
-    } catch (error: any) {
-      return { success: false, message: `Connection error: ${error.message}` };
-    }
-  }
-
-  /**
-   * Get regional payment gateway recommendations
-   */
-  getRegionalPaymentRecommendations(countryCode: string): string[] {
-    const recommendations: { [key: string]: string[] } = {
-      // North America
-      'US': ['stripe', 'paypal'],
-      'CA': ['stripe', 'paypal'],
-      
-      // Europe
-      'GB': ['stripe', 'paypal'],
-      'DE': ['stripe', 'paypal'],
-      'FR': ['stripe', 'paypal'],
-      'ES': ['stripe', 'paypal'],
-      'IT': ['stripe', 'paypal'],
-      'NL': ['stripe', 'paypal'],
-      
-      // Middle East
-      'SA': ['moyasar', 'stripe'],
-      'AE': ['moyasar', 'stripe'],
-      'KW': ['moyasar', 'stripe'],
-      'QA': ['moyasar', 'stripe'],
-      'BH': ['moyasar', 'stripe'],
-      'OM': ['moyasar', 'stripe'],
-      
-      // Asia Pacific
-      'AU': ['stripe', 'paypal'],
-      'NZ': ['stripe', 'paypal'],
-      'SG': ['stripe', 'paypal'],
-      'JP': ['stripe', 'paypal'],
-      'KR': ['stripe', 'paypal'],
-      
-      // Default
-      'DEFAULT': ['stripe', 'paypal']
-    };
-
-    return recommendations[countryCode] || recommendations['DEFAULT'];
-  }
-
-  /**
-   * Get supported currencies for country
-   */
-  getSupportedCurrencies(countryCode: string): string[] {
-    const currencies: { [key: string]: string[] } = {
-      'US': ['USD'],
-      'CA': ['CAD', 'USD'],
-      'GB': ['GBP', 'EUR', 'USD'],
-      'DE': ['EUR', 'USD'],
-      'FR': ['EUR', 'USD'],
-      'ES': ['EUR', 'USD'],
-      'IT': ['EUR', 'USD'],
-      'NL': ['EUR', 'USD'],
-      'SA': ['SAR', 'USD'],
-      'AE': ['AED', 'USD'],
-      'KW': ['KWD', 'USD'],
-      'QA': ['QAR', 'USD'],
-      'BH': ['BHD', 'USD'],
-      'OM': ['OMR', 'USD'],
-      'AU': ['AUD', 'USD'],
-      'NZ': ['NZD', 'USD'],
-      'SG': ['SGD', 'USD'],
-      'JP': ['JPY', 'USD'],
-      'KR': ['KRW', 'USD']
-    };
-
-    return currencies[countryCode] || ['USD'];
-  }
-
-  /**
    * Export configuration for backup
    */
   exportConfig(): string {
@@ -580,51 +278,19 @@ export class ConfigService {
   importConfig(configJson: string): { success: boolean; message: string } {
     try {
       const importedConfig = JSON.parse(configJson);
-      
+
       // Validate imported config structure
       if (!importedConfig.storeUrl || !importedConfig.appName) {
         return { success: false, message: 'Invalid configuration file' };
       }
-      
+
       this.config = { ...this.getDefaultConfig(), ...importedConfig };
       this.saveConfig();
       this.configSubject.next(this.config);
-      
+
       return { success: true, message: 'Configuration imported successfully' };
     } catch (error: any) {
       return { success: false, message: `Import failed: ${error.message}` };
     }
-  }
-
-  /**
-   * Check if setup is complete
-   */
-  isSetupComplete(): boolean {
-    const validation = this.validateConfig();
-    return validation.isValid;
-  }
-
-  /**
-   * Get setup completion percentage
-   */
-  getSetupCompletionPercentage(): number {
-    const requiredFields = [
-      'storeUrl', 'apiUrl', 'consumerKey', 'consumerSecret',
-      'appName', 'storeName'
-    ];
-    
-    let completedFields = 0;
-    requiredFields.forEach(field => {
-      if (this.config[field as keyof AppConfig]) {
-        completedFields++;
-      }
-    });
-    
-    // Check if at least one payment gateway is configured
-    if (this.config.enabledPaymentGateways.length > 0) {
-      completedFields++;
-    }
-    
-    return Math.round((completedFields / (requiredFields.length + 1)) * 100);
   }
 }
