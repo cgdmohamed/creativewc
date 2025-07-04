@@ -53,7 +53,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private connectivityTester: ConnectivityTesterService,
     private alertController: AlertController,
     public languageService: LanguageService, // Language service for internationalization
-    private translate: TranslateService // Translation service
+    private translate: TranslateService, // Translation service
+    private configService: ConfigService // Add ConfigService
   ) {
     // Initialize storage first
     this.storage.create().then(() => {
@@ -87,6 +88,14 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log(`Environment settings: API URL=${environment.apiUrl}, useDemoData=${environment.useDemoData}`);
     
     // Storage is already initialized in constructor
+
+    // Wait for configuration to load first
+    try {
+      await this.configService.waitForConfig();
+      console.log('Configuration loaded successfully');
+    } catch (error) {
+      console.error('Error loading configuration:', error);
+    }
 
     // Initialize language service first for proper display of content
     try {

@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { IonicStorageModule } from '@ionic/storage-angular';
@@ -41,6 +42,7 @@ import { GlobalErrorHandlerService } from './services/global-error-handler.servi
     }),
     AppRoutingModule,
     HttpClientModule,
+    FormsModule,
     IonicStorageModule.forRoot(),
     ComponentsModule,
     TranslateModule.forRoot({

@@ -1,238 +1,268 @@
 
 import { Component, OnInit } from '@angular/core';
+import { ToastController, AlertController } from '@ionic/angular';
 import { ConfigService } from '../../services/config.service';
-import { AlertController, ToastController } from '@ionic/angular';
-import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
+import { AppConfig } from '../../interfaces/config.interface';
 
 @Component({
   selector: 'app-config-manager',
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Configuration Manager</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="saveConfig()">
-            <ion-icon name="save-outline"></ion-icon>
-          </ion-button>
-          <ion-button (click)="resetConfig()">
-            <ion-icon name="refresh-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content>
-      <ion-accordion-group>
-        <!-- App Settings -->
-        <ion-accordion value="app">
-          <ion-item slot="header">
-            <ion-label>App Settings</ion-label>
-          </ion-item>
-          <div slot="content">
-            <ion-item>
-              <ion-input [(ngModel)]="config.appName" label="App Name" labelPlacement="stacked"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input [(ngModel)]="config.appSlogan" label="App Slogan" labelPlacement="stacked"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input [(ngModel)]="config.storeDescription" label="Store Description" labelPlacement="stacked"></ion-input>
-            </ion-item>
-          </div>
-        </ion-accordion>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Configuration Manager</ion-title>
+        </ion-toolbar>
+      </ion-header>
 
-        <!-- Store Settings -->
-        <ion-accordion value="store">
-          <ion-item slot="header">
-            <ion-label>Store Settings</ion-label>
-          </ion-item>
-          <div slot="content">
+      <div class="config-sections" *ngIf="config">
+        <!-- App Information -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>App Information</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
             <ion-item>
-              <ion-input [(ngModel)]="config.storeUrl" label="Store URL" labelPlacement="stacked"></ion-input>
+              <ion-label position="stacked">App Name</ion-label>
+              <ion-input [(ngModel)]="config.appName" (ionBlur)="updateConfig()"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-input [(ngModel)]="config.consumerKey" label="Consumer Key" labelPlacement="stacked"></ion-input>
+              <ion-label position="stacked">App Slogan</ion-label>
+              <ion-input [(ngModel)]="config.appSlogan" (ionBlur)="updateConfig()"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-input [(ngModel)]="config.consumerSecret" label="Consumer Secret" labelPlacement="stacked" type="password"></ion-input>
+              <ion-label position="stacked">Store Description</ion-label>
+              <ion-textarea [(ngModel)]="config.storeDescription" (ionBlur)="updateConfig()"></ion-textarea>
             </ion-item>
-          </div>
-        </ion-accordion>
+          </ion-card-content>
+        </ion-card>
 
-        <!-- Theme Settings -->
-        <ion-accordion value="theme">
-          <ion-item slot="header">
-            <ion-label>Theme Settings</ion-label>
-          </ion-item>
-          <div slot="content">
+        <!-- Store Configuration -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Store Configuration</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
             <ion-item>
-              <ion-input [(ngModel)]="config.theme.primaryColor" label="Primary Color" labelPlacement="stacked" type="color"></ion-input>
+              <ion-label position="stacked">Store URL</ion-label>
+              <ion-input [(ngModel)]="config.storeUrl" (ionBlur)="updateConfig()"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-input [(ngModel)]="config.theme.secondaryColor" label="Secondary Color" labelPlacement="stacked" type="color"></ion-input>
+              <ion-label position="stacked">API URL</ion-label>
+              <ion-input [(ngModel)]="config.apiUrl" (ionBlur)="updateConfig()"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.theme.darkMode"></ion-checkbox>
+              <ion-label position="stacked">Consumer Key</ion-label>
+              <ion-input [(ngModel)]="config.consumerKey" (ionBlur)="updateConfig()"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Consumer Secret</ion-label>
+              <ion-input [(ngModel)]="config.consumerSecret" type="password" (ionBlur)="updateConfig()"></ion-input>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Theme Configuration -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Theme Configuration</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="stacked">Primary Color</ion-label>
+              <ion-input type="color" [(ngModel)]="config.theme.primaryColor" (ionChange)="updateTheme()"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Secondary Color</ion-label>
+              <ion-input type="color" [(ngModel)]="config.theme.secondaryColor" (ionChange)="updateTheme()"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox [(ngModel)]="config.theme.darkMode" (ionChange)="updateTheme()"></ion-checkbox>
               <ion-label>Dark Mode</ion-label>
             </ion-item>
-          </div>
-        </ion-accordion>
+          </ion-card-content>
+        </ion-card>
 
-        <!-- Payment Settings -->
-        <ion-accordion value="payment">
-          <ion-item slot="header">
-            <ion-label>Payment Settings</ion-label>
-          </ion-item>
-          <div slot="content">
+        <!-- Regional Settings -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Regional Settings</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.paymentMethods.cod"></ion-checkbox>
+              <ion-label position="stacked">Default Currency</ion-label>
+              <ion-select [(ngModel)]="config.defaultCurrency" (ionChange)="updateConfig()">
+                <ion-select-option value="USD">USD</ion-select-option>
+                <ion-select-option value="SAR">SAR</ion-select-option>
+                <ion-select-option value="EUR">EUR</ion-select-option>
+                <ion-select-option value="GBP">GBP</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Default Language</ion-label>
+              <ion-select [(ngModel)]="config.defaultLanguage" (ionChange)="updateConfig()">
+                <ion-select-option value="en">English</ion-select-option>
+                <ion-select-option value="ar">العربية</ion-select-option>
+                <ion-select-option value="es">Español</ion-select-option>
+                <ion-select-option value="fr">Français</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Country Code</ion-label>
+              <ion-input [(ngModel)]="config.countryCode" (ionBlur)="updateConfig()"></ion-input>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Payment Configuration -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Payment Configuration</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-label>Enabled Payment Gateways</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox [(ngModel)]="paymentGateways.cod" (ionChange)="updatePaymentGateways()"></ion-checkbox>
               <ion-label>Cash on Delivery</ion-label>
             </ion-item>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.paymentMethods.stripe"></ion-checkbox>
+              <ion-checkbox [(ngModel)]="paymentGateways.stripe" (ionChange)="updatePaymentGateways()"></ion-checkbox>
               <ion-label>Stripe</ion-label>
             </ion-item>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.paymentMethods.paypal"></ion-checkbox>
+              <ion-checkbox [(ngModel)]="paymentGateways.paypal" (ionChange)="updatePaymentGateways()"></ion-checkbox>
               <ion-label>PayPal</ion-label>
             </ion-item>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.paymentMethods.moyasar"></ion-checkbox>
+              <ion-checkbox [(ngModel)]="paymentGateways.moyasar" (ionChange)="updatePaymentGateways()"></ion-checkbox>
               <ion-label>Moyasar</ion-label>
             </ion-item>
-          </div>
-        </ion-accordion>
-
-        <!-- SMS Settings -->
-        <ion-accordion value="sms">
-          <ion-item slot="header">
-            <ion-label>SMS Settings</ion-label>
-          </ion-item>
-          <div slot="content">
-            <ion-item>
-              <ion-select [(ngModel)]="config.defaultSmsProvider" label="Default SMS Provider" labelPlacement="stacked">
-                <ion-select-option value="twilio">Twilio</ion-select-option>
-                <ion-select-option value="firebase">Firebase</ion-select-option>
-                <ion-select-option value="taqnyat">Taqnyat</ion-select-option>
-              </ion-select>
-            </ion-item>
-          </div>
-        </ion-accordion>
+          </ion-card-content>
+        </ion-card>
 
         <!-- Features -->
-        <ion-accordion value="features">
-          <ion-item slot="header">
-            <ion-label>Features</ion-label>
-          </ion-item>
-          <div slot="content">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Features</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.features.enableOtp"></ion-checkbox>
-              <ion-label>Enable OTP</ion-label>
+              <ion-checkbox [(ngModel)]="config.features.enablePushNotifications" (ionChange)="updateConfig()"></ion-checkbox>
+              <ion-label>Push Notifications</ion-label>
             </ion-item>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.features.enableWishlist"></ion-checkbox>
-              <ion-label>Enable Wishlist</ion-label>
+              <ion-checkbox [(ngModel)]="config.features.enableOtp" (ionChange)="updateConfig()"></ion-checkbox>
+              <ion-label>OTP Verification</ion-label>
             </ion-item>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.features.enableReviews"></ion-checkbox>
-              <ion-label>Enable Reviews</ion-label>
+              <ion-checkbox [(ngModel)]="config.features.enableWishlist" (ionChange)="updateConfig()"></ion-checkbox>
+              <ion-label>Wishlist</ion-label>
             </ion-item>
             <ion-item>
-              <ion-checkbox [(ngModel)]="config.features.enablePushNotifications"></ion-checkbox>
-              <ion-label>Enable Push Notifications</ion-label>
+              <ion-checkbox [(ngModel)]="config.features.enableReviews" (ionChange)="updateConfig()"></ion-checkbox>
+              <ion-label>Product Reviews</ion-label>
             </ion-item>
-          </div>
-        </ion-accordion>
-      </ion-accordion-group>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-button expand="block" (click)="exportConfig()" fill="outline" class="ion-margin">
-        <ion-icon name="download-outline" slot="start"></ion-icon>
-        Export Configuration
-      </ion-button>
-
-      <ion-button expand="block" (click)="importConfig()" fill="outline" class="ion-margin">
-        <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
-        Import Configuration
-      </ion-button>
+        <!-- Actions -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Actions</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button expand="block" (click)="exportConfig()">Export Configuration</ion-button>
+            <ion-button expand="block" (click)="importConfig()">Import Configuration</ion-button>
+            <ion-button expand="block" color="warning" (click)="resetConfig()">Reset to Defaults</ion-button>
+            <ion-button expand="block" color="success" (click)="reloadConfig()">Reload from File</ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
     </ion-content>
   `,
-  standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule]
+  styles: [`
+    .config-sections {
+      padding: 16px;
+    }
+    
+    ion-card {
+      margin-bottom: 16px;
+    }
+    
+    ion-item {
+      margin-bottom: 8px;
+    }
+  `]
 })
 export class ConfigManagerComponent implements OnInit {
-  config: any = {};
+  config: AppConfig;
+  paymentGateways = {
+    cod: false,
+    stripe: false,
+    paypal: false,
+    moyasar: false
+  };
 
   constructor(
     private configService: ConfigService,
-    private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private alertController: AlertController
   ) {}
 
-  ngOnInit() {
-    this.loadConfig();
+  async ngOnInit() {
+    await this.loadConfig();
   }
 
-  loadConfig() {
-    this.config = { ...this.configService.getConfig() };
-  }
-
-  async saveConfig() {
+  async loadConfig() {
     try {
-      this.configService.updateConfig(this.config);
-      const toast = await this.toastController.create({
-        message: 'Configuration saved successfully',
-        duration: 2000,
-        color: 'success'
-      });
-      await toast.present();
+      await this.configService.waitForConfig();
+      this.config = { ...this.configService.getConfig() };
+      
+      // Initialize payment gateways checkboxes
+      this.paymentGateways = {
+        cod: this.config.enabledPaymentGateways.includes('cod'),
+        stripe: this.config.enabledPaymentGateways.includes('stripe'),
+        paypal: this.config.enabledPaymentGateways.includes('paypal'),
+        moyasar: this.config.enabledPaymentGateways.includes('moyasar')
+      };
     } catch (error) {
-      const toast = await this.toastController.create({
-        message: 'Error saving configuration',
-        duration: 2000,
-        color: 'danger'
-      });
-      await toast.present();
+      console.error('Error loading config:', error);
+      this.showToast('Error loading configuration', 'danger');
     }
   }
 
-  async resetConfig() {
-    const alert = await this.alertController.create({
-      header: 'Reset Configuration',
-      message: 'Are you sure you want to reset all configuration to defaults?',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Reset',
-          handler: async () => {
-            await this.configService.resetConfig();
-            this.loadConfig();
-            const toast = await this.toastController.create({
-              message: 'Configuration reset to defaults',
-              duration: 2000,
-              color: 'success'
-            });
-            await toast.present();
-          }
-        }
-      ]
-    });
-    await alert.present();
+  updateConfig() {
+    this.configService.updateConfig(this.config);
+    this.showToast('Configuration updated', 'success');
   }
 
-  async exportConfig() {
+  updateTheme() {
+    this.configService.updateTheme(this.config.theme);
+    this.showToast('Theme updated', 'success');
+  }
+
+  updatePaymentGateways() {
+    const enabledGateways = [];
+    if (this.paymentGateways.cod) enabledGateways.push('cod');
+    if (this.paymentGateways.stripe) enabledGateways.push('stripe');
+    if (this.paymentGateways.paypal) enabledGateways.push('paypal');
+    if (this.paymentGateways.moyasar) enabledGateways.push('moyasar');
+    
+    this.config.enabledPaymentGateways = enabledGateways;
+    this.updateConfig();
+  }
+
+  exportConfig() {
     const configJson = this.configService.exportConfig();
     const blob = new Blob([configJson], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'app-config.json';
-    link.click();
-    URL.revokeObjectURL(url);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'app-config.json';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    this.showToast('Configuration exported', 'success');
   }
 
   async importConfig() {
@@ -245,19 +275,56 @@ export class ConfigManagerComponent implements OnInit {
         const reader = new FileReader();
         reader.onload = async (e: any) => {
           const result = this.configService.importConfig(e.target.result);
-          const toast = await this.toastController.create({
-            message: result.message,
-            duration: 2000,
-            color: result.success ? 'success' : 'danger'
-          });
-          await toast.present();
+          await this.showToast(result.message, result.success ? 'success' : 'danger');
           if (result.success) {
-            this.loadConfig();
+            await this.loadConfig();
           }
         };
         reader.readAsText(file);
       }
     };
     input.click();
+  }
+
+  async resetConfig() {
+    const alert = await this.alertController.create({
+      header: 'Reset Configuration',
+      message: 'Are you sure you want to reset all configuration to defaults? This cannot be undone.',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Reset',
+          handler: async () => {
+            try {
+              await this.configService.resetConfig();
+              await this.loadConfig();
+              this.showToast('Configuration reset to defaults', 'success');
+            } catch (error) {
+              this.showToast('Error resetting configuration', 'danger');
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  async reloadConfig() {
+    try {
+      await this.configService.reloadConfig();
+      await this.loadConfig();
+      this.showToast('Configuration reloaded from file', 'success');
+    } catch (error) {
+      this.showToast('Error reloading configuration', 'danger');
+    }
+  }
+
+  private async showToast(message: string, color: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      color
+    });
+    await toast.present();
   }
 }

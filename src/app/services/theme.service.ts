@@ -23,7 +23,9 @@ export class ThemeService {
   // Create dedicated subject for dark mode for easier subscription
   private _darkMode = new BehaviorSubject<boolean>(false);
 
-  constructor(private storage: Storage) {
+  constructor(
+    private storage: Storage
+  ) {
     // Storage initialization is done in app.component.ts
   }
 
@@ -144,24 +146,12 @@ export class ThemeService {
       document.body.classList.remove('dark');
     }
     
-    // Apply primary color
-    document.documentElement.style.setProperty('--ion-color-primary', theme.primaryColor);
+    // Apply primary color and all its variants
+    this.applyColorVariants('primary', theme.primaryColor);
     
-    // Calculate primary variants
-    const primaryRGB = this.hexToRgb(theme.primaryColor);
-    if (primaryRGB) {
-      // Set primary color RGB for transparency calculations
-      document.documentElement.style.setProperty('--ion-color-primary-rgb', `${primaryRGB.r},${primaryRGB.g},${primaryRGB.b}`);
-      
-      // Set contrast color
-      const contrast = this.getContrastColor(primaryRGB.r, primaryRGB.g, primaryRGB.b);
-      document.documentElement.style.setProperty('--ion-color-primary-contrast', contrast);
-      
-      // Set shade and tint
-      const darkShade = this.shadeColor(theme.primaryColor, -20);
-      const lightTint = this.shadeColor(theme.primaryColor, 30);
-      document.documentElement.style.setProperty('--ion-color-primary-shade', darkShade);
-      document.documentElement.style.setProperty('--ion-color-primary-tint', lightTint);
+    // Apply secondary color if provided
+    if (theme.secondaryColor) {
+      this.applyColorVariants('secondary', theme.secondaryColor);
     }
   }
 
@@ -185,6 +175,32 @@ export class ThemeService {
     // Calculate luminance - W3C recommendation
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#ffffff';
+  }
+
+  // Apply complete color variants for a color
+  private applyColorVariants(colorName: string, hexColor: string) {
+    const rgb = this.hexToRgb(hexColor);
+    if (!rgb) return;
+
+    // Set base color
+    document.documentElement.style.setProperty(`--ion-color-${colorName}`, hexColor);
+    
+    // Set RGB values
+    document.documentElement.style.setProperty(`--ion-color-${colorName}-rgb`, `${rgb.r},${rgb.g},${rgb.b}`);
+    
+    // Set contrast color
+    const contrast = this.getContrastColor(rgb.r, rgb.g, rgb.b);
+    document.documentElement.style.setProperty(`--ion-color-${colorName}-contrast`, contrast);
+    document.documentElement.style.setProperty(`--ion-color-${colorName}-contrast-rgb`, 
+      contrast === '#ffffff' ? '255,255,255' : '0,0,0');
+    
+    // Set shade (darker version)
+    const shade = this.shadeColor(hexColor, -20);
+    document.documentElement.style.setProperty(`--ion-color-${colorName}-shade`, shade);
+    
+    // Set tint (lighter version)
+    const tint = this.shadeColor(hexColor, 20);
+    document.documentElement.style.setProperty(`--ion-color-${colorName}-tint`, tint);
   }
 
   // Utility: Shade a color by percentage
