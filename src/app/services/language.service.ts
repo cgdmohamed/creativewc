@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Storage } from '@ionic/storage-angular';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { AppConfigService } from './app-config.service'; // Assuming you have a config service
 
 export interface Language {
   code: string;
@@ -18,6 +19,11 @@ export class LanguageService {
   private LANGUAGE_KEY = 'app_language';
   private languageSubject = new BehaviorSubject<string>('ar'); // Default to Arabic
   public language$ = this.languageSubject.asObservable();
+  private defaultLanguage: string = 'ar';
+  private supportedLanguages: string[] = ['ar', 'en', 'fr', 'es', 'de'];
+  private currentLanguage: string = 'ar';
+  private currentLanguageSubject = new BehaviorSubject<string>(this.currentLanguage);
+
 
   public languages: Language[] = [
     { code: 'ar', name: 'العربية', flag: 'assets/flags/sa.svg', direction: 'rtl', isDefault: true },
@@ -29,7 +35,8 @@ export class LanguageService {
 
   constructor(
     private translate: TranslateService,
-    private storage: Storage
+    private storage: Storage,
+    private configService: AppConfigService // Inject the config service
   ) {}
 
   /**
@@ -37,28 +44,72 @@ export class LanguageService {
    * Should be called during app initialization
    */
   async initializeLanguage(): Promise<void> {
-    // Ensure storage is created
-    await this.storage.create();
+      try {
+      // Ensure storage is created
+      await this.storage.create();
 
-    // Get saved language preference
-    const savedLang = await this.storage.get(this.LANGUAGE_KEY);
+      // Get config to use default language and supported languages
+      const config = this.configService.getConfig();
 
-    // Find default language if saved one not available
-    const defaultLang = savedLang || 
-      this.getDefaultLanguage() ||
-      this.getBrowserLanguage() ||
-      'ar'; // Fallback to Arabic
+      if (config) {
+        // Update supported languages from config
+        if (config.supportedLanguages && config.supportedLanguages.length > 0) {
+          this.supportedLanguages = config.supportedLanguages;
+        }
 
-    // Set available languages in the translation service
-    this.translate.addLangs(this.languages.map(lang => lang.code));
+        // Update default language from config
+        if (config.defaultLanguage) {
+          this.defaultLanguage = config.defaultLanguage;
+        }
+      }
 
-    // Set default language for fallback
-    this.translate.setDefaultLang('ar');
+      // First, try to get the saved language from storage
+      const savedLang = await this.storage.get(this.LANGUAGE_KEY);
 
-    // Use the selected language
-    await this.setLanguage(defaultLang);
+        let selectedLanguage: string | null = null;
 
-    console.log('Language service initialized with language:', defaultLang);
+      if (savedLang && this.supportedLanguages.includes(savedLang)) {
+          selectedLanguage = savedLang;
+          console.log('Language service: Using saved language:', savedLang);
+      } else {
+        // Use browser language if available and supported
+        const browserLanguage = this.getBrowserLanguage();
+        if (browserLanguage && this.supportedLanguages.includes(browserLanguage)) {
+            selectedLanguage = browserLanguage;
+          console.log('Language service: Using browser language:', browserLanguage);
+        } else {
+          // Fallback to default language
+          selectedLanguage = this.defaultLanguage;
+          console.log('Language service: Using default language:', this.defaultLanguage);
+        }
+      }
+
+          this.currentLanguage = selectedLanguage ?? 'ar'; // Fallback if null
+
+      // Set available languages in the translation service
+      this.translate.addLangs(this.languages.map(lang => lang.code));
+
+      // Set the language in the translation service
+      this.translate.setDefaultLang(this.currentLanguage);
+      await this.translate.use(this.currentLanguage).toPromise();
+
+      // Update the current language subject
+      this.languageSubject.next(this.currentLanguage);
+
+
+      // Apply RTL/LTR direction
+      this.updateDirection();
+
+      console.log('Language service: Initialized with language:', this.currentLanguage);
+    } catch (error) {
+      console.error('Error initializing language service:', error);
+      // Fallback to default language on error
+      this.currentLanguage = this.defaultLanguage;
+      this.translate.setDefaultLang(this.defaultLanguage);
+      await this.translate.use(this.defaultLanguage).toPromise();
+      this.languageSubject.next(this.currentLanguage);
+      this.updateDirection();
+    }
   }
 
   /**
@@ -66,8 +117,8 @@ export class LanguageService {
    */
   private getBrowserLanguage(): string | null {
     const browserLang = this.translate.getBrowserLang();
-    return browserLang && this.isLanguageSupported(browserLang) 
-      ? browserLang 
+    return browserLang && this.isLanguageSupported(browserLang)
+      ? browserLang
       : null;
   }
 
@@ -167,5 +218,17 @@ export class LanguageService {
         observer.next(lang ? lang.direction : 'rtl');
       });
     });
+  }
+
+  /**
+   * Apply RTL/LTR direction
+   */
+  private updateDirection(): void {
+    const currentLang = this.languages.find(l => l.code === this.currentLanguage);
+    if (currentLang) {
+      this.setDocumentDirection(currentLang.direction);
+    } else {
+      this.setDocumentDirection('ltr'); // Default
+    }
   }
 }

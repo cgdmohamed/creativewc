@@ -1,13 +1,13 @@
 <ion-app>
   <!-- Page transition loading indicator -->
   <app-page-transition></app-page-transition>
-  
+
   <ion-split-pane contentId="main-content" [disabled]="!showMenu" [when]="showMenu ? 'md' : false">
     <!-- Side menu - Only shown on non-auth pages -->
     <ion-menu contentId="main-content" type="overlay" menuId="main-menu" [disabled]="!showMenu">
       <ion-header>
         <ion-toolbar>
-          <ion-title>القائمة الرئيسية</ion-title>
+          <ion-title>{{ (configService.getConfig$() | async)?.appName || 'DRZN Shopping' }}</ion-title>
         </ion-toolbar>
       </ion-header>
       <ion-content>
@@ -58,7 +58,7 @@
             <ion-label>اختبار الإشعارات</ion-label>
           </ion-item>
         </ion-list>
-        
+
         <div class="menu-footer">
           <ion-button expand="block" routerLink="/login" routerDirection="forward" 
             *ngIf="!(authService.user | async)">
@@ -71,13 +71,14 @@
         </div>
       </ion-content>
     </ion-menu>
-    
+
     <!-- Main content -->
     <div class="ion-page" id="main-content">
       <ion-router-outlet></ion-router-outlet>
-      
+
       <!-- Bottom Tab Bar - Only shown on non-auth pages -->
       <app-tabs *ngIf="showMenu"></app-tabs>
     </div>
   </ion-split-pane>
 </ion-app>
+```

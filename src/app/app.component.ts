@@ -93,8 +93,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Wait for configuration to load first
     try {
-      await this.configService.waitForConfig();
+      this.config = await this.configService.waitForConfig();
       console.log('Configuration loaded successfully');
+      
+      // Initialize other services with config
+      await this.initializeLanguage();
+      await this.initializeTheme();
+      this.setAppMetadata();
+      
     } catch (error) {
       console.error('Error loading configuration:', error);
     }
@@ -403,23 +409,23 @@ export class AppComponent implements OnInit, OnDestroy {
   private setAppMetadata() {
     try {
       // Set document title
-      if (this.config.app?.appName) {
-        document.title = this.config.app.appName;
+      if (this.config?.appName) {
+        document.title = this.config.appName;
       }
 
       // Set meta description
-      if (this.config.app?.storeDescription) {
+      if (this.config?.storeDescription) {
         let metaDescription = document.querySelector('meta[name="description"]');
         if (!metaDescription) {
           metaDescription = document.createElement('meta');
           metaDescription.setAttribute('name', 'description');
           document.head.appendChild(metaDescription);
         }
-        metaDescription.setAttribute('content', this.config.app.storeDescription);
+        metaDescription.setAttribute('content', this.config.storeDescription);
       }
 
       // Set viewport for RTL support if enabled
-      if (this.config.features?.enableRtl) {
+      if (this.config?.features?.enableRtl) {
         const viewport = document.querySelector('meta[name="viewport"]');
         if (viewport && this.languageService.isRTL()) {
           document.documentElement.dir = 'rtl';

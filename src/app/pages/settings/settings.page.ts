@@ -91,6 +91,15 @@ export class SettingsPage implements OnInit {
 
   async ngOnInit() {
     await this.loadCurrentSettings();
+
+    // Subscribe to config changes
+    this.configService.getConfig$().subscribe(config => {
+      if (config) {
+        console.log('Config loaded in settings:', config);
+        // Update any settings that depend on config
+        this.loadCurrentSettings();
+      }
+    });
   }
 
   async loadCurrentSettings() {
