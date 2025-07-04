@@ -3,6 +3,7 @@ import { IonicModule, ActionSheetController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService, Language } from '../../services/language.service';
+import { ConfigService } from '../../services/config.service';
 
 @Component({
   selector: 'app-language-selector',
@@ -27,22 +28,28 @@ import { LanguageService, Language } from '../../services/language.service';
 })
 export class LanguageSelectorComponent implements OnInit {
   currentLanguage: Language | undefined;
+  supportedLanguages: string[] = [];
+  config: any;
 
   constructor(
     public languageService: LanguageService,
     private actionSheetCtrl: ActionSheetController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private configService: ConfigService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     // Get initial language
     const currentLangCode = this.languageService.getCurrentLanguage();
     this.currentLanguage = this.languageService.languages.find(l => l.code === currentLangCode);
-    
+
     // Subscribe to language changes
     this.languageService.language$.subscribe(langCode => {
       this.currentLanguage = this.languageService.languages.find(l => l.code === langCode);
     });
+
+    this.config = await this.configService.waitForConfig();
+    this.supportedLanguages = this.config.regional?.supportedLanguages || ['en', 'ar'];
   }
 
   async openLanguageSelector() {
@@ -53,7 +60,7 @@ export class LanguageSelectorComponent implements OnInit {
     } catch (error) {
       console.error('Error translating header text', error);
     }
-    
+
     const actionSheet = await this.actionSheetCtrl.create({
       header: headerText,
       buttons: this.languageService.languages.map(lang => ({

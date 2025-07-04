@@ -4,6 +4,9 @@ import { ConfigService } from '../../services/config.service';
 import { ThemeService } from '../../services/theme.service';
 import { LanguageService } from '../../services/language.service';
 import { ConfigManagerComponent } from '../../components/config-manager/config-manager.component';
+import { IonicModule } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-settings',
@@ -74,6 +77,9 @@ export class SettingsPage implements OnInit {
   primaryColor: string = '#ec1c24';
   darkMode: boolean = false;
   currentLanguage: string = 'en';
+  config: any;
+  supportedLanguages: string[] = [];
+  availableFeatures: any = {};
 
   constructor(
     private modalController: ModalController,

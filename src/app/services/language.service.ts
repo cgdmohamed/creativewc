@@ -18,7 +18,7 @@ export class LanguageService {
   private LANGUAGE_KEY = 'app_language';
   private languageSubject = new BehaviorSubject<string>('ar'); // Default to Arabic
   public language$ = this.languageSubject.asObservable();
-  
+
   public languages: Language[] = [
     { code: 'ar', name: 'العربية', flag: 'assets/flags/sa.svg', direction: 'rtl', isDefault: true },
     { code: 'en', name: 'English', flag: 'assets/flags/us.svg', direction: 'ltr' },
@@ -39,25 +39,25 @@ export class LanguageService {
   async initializeLanguage(): Promise<void> {
     // Ensure storage is created
     await this.storage.create();
-    
+
     // Get saved language preference
     const savedLang = await this.storage.get(this.LANGUAGE_KEY);
-    
+
     // Find default language if saved one not available
     const defaultLang = savedLang || 
       this.getDefaultLanguage() ||
       this.getBrowserLanguage() ||
       'ar'; // Fallback to Arabic
-    
+
     // Set available languages in the translation service
     this.translate.addLangs(this.languages.map(lang => lang.code));
-    
+
     // Set default language for fallback
     this.translate.setDefaultLang('ar');
-    
+
     // Use the selected language
     await this.setLanguage(defaultLang);
-    
+
     console.log('Language service initialized with language:', defaultLang);
   }
 
@@ -70,7 +70,7 @@ export class LanguageService {
       ? browserLang 
       : null;
   }
-  
+
   /**
    * Get the default language from configuration
    */
@@ -78,7 +78,7 @@ export class LanguageService {
     const defaultLang = this.languages.find(lang => lang.isDefault);
     return defaultLang ? defaultLang.code : null;
   }
-  
+
   /**
    * Check if a language is supported by the app
    */
@@ -97,20 +97,20 @@ export class LanguageService {
       console.error(`Language ${langCode} is not supported`);
       return;
     }
-    
+
     try {
       // Update translation service
       this.translate.use(langCode);
-      
+
       // Save to storage for persistence
       await this.storage.set(this.LANGUAGE_KEY, langCode);
-      
+
       // Update text direction
       this.setDocumentDirection(lang.direction);
-      
+
       // Update the current language subject
       this.languageSubject.next(langCode);
-      
+
       console.log(`Language set to ${langCode} with direction ${lang.direction}`);
     } catch (error) {
       console.error('Error setting language:', error);
@@ -123,7 +123,7 @@ export class LanguageService {
   getCurrentLanguage(): string {
     return this.languageSubject.value;
   }
-  
+
   /**
    * Get the current language object
    */
@@ -147,7 +147,7 @@ export class LanguageService {
   isRTL(): boolean {
     return this.getCurrentDirection() === 'rtl';
   }
-  
+
   /**
    * Set the document direction attribute
    */
@@ -156,7 +156,7 @@ export class LanguageService {
     document.body.dir = direction;
     document.documentElement.lang = this.languageSubject.value;
   }
-  
+
   /**
    * Get an observable of the current direction
    */

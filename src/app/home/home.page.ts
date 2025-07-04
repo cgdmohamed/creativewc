@@ -80,6 +80,10 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   };
+  config: any;
+  appName: string = '';
+  appSlogan: string = '';
+  storeDescription: string = '';
 
   constructor(
     private productService: ProductService,
@@ -97,13 +101,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.wishlistSubscription = this.wishlistService.wishlist.subscribe(() => {
       // Just trigger a refresh when wishlist changes
     });
-    
+
     // Subscribe to notification count changes
     this.notificationSubscription = this.notificationService.unreadCount.subscribe(count => {
       this.unreadNotificationCount = count;
     });
   }
-  
+
   // Navigate to notifications page
   navigateToNotifications() {
     console.log('Home component: calling notification service navigation method');
@@ -145,24 +149,38 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     await alert.present();
   }
 
-  ngOnInit() {
-    this.loadData();
+  async ngOnInit() {
+    this.isLoading = true;
+
+    try {
+      // Load configuration
+      this.config = await this.configService.waitForConfig();
+      this.appName = this.config.app?.appName || 'DRZN Shopping';
+      this.appSlogan = this.config.app?.appSlogan || 'Shop smarter, not harder';
+      this.storeDescription = this.config.app?.storeDescription || 'Your premier shopping destination';
+
+      this.loadData();
+    } catch (error) {
+      console.error('Error loading home data:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   ngOnDestroy() {
     if (this.cartSubscription) {
       this.cartSubscription.unsubscribe();
     }
-    
+
     if (this.wishlistSubscription) {
       this.wishlistSubscription.unsubscribe();
     }
-    
+
     if (this.notificationSubscription) {
       this.notificationSubscription.unsubscribe();
     }
   }
-  
+
   ngAfterViewInit() {
     // Register Swiper web components for other swiper elements in the app
     register();
@@ -171,11 +189,11 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   // Load all data for the home page
   loadData() {
     this.isLoading = true;
-    
+
     // Log the current environment to help with debugging
     console.log(`Home page loadData: Running in ${environment.production ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
     console.log(`Environment settings: useDemoData=${environment.useDemoData}, apiUrl=${environment.apiUrl}`);
-    
+
     // No delay - load data immediately
     // Get categories
     this.productService.getCategories().subscribe(
@@ -192,22 +210,22 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.productService.getRandomProducts(30).subscribe(
       (randomProducts) => {
         console.log(`Got ${randomProducts.length} random products from API to use across all sections`);
-        
+
         // Create an array copy we can draw from
         const randomPool = [...randomProducts];
-        
+
         // Process featured products with random supplementation
         this.loadFeaturedWithRandomProducts(randomPool);
-        
+
         // Process new products with random supplementation
         this.loadNewWithRandomProducts(randomPool);
-        
+
         // Process sale products with random supplementation
         this.loadSaleWithRandomProducts(randomPool);
       },
       (error) => {
         console.error('Error loading random product pool:', error);
-        
+
         if (!environment.production) {
           // Only in development mode - try individual sections with their own random calls
           this.loadFeaturedWithRandomProducts([]);
@@ -226,20 +244,20 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     );
-    
+
     // Set a timeout to ensure we hide the loading indicator
     setTimeout(() => {
       this.isLoading = false;
     }, 2000); 
   }
-  
+
   // Load featured products with random supplementation
   private loadFeaturedWithRandomProducts(randomPool: Product[]) {
     this.productService.getFeaturedProducts().subscribe(
       (products) => {
         // Start with the featured products from API
         this.featuredProducts = products;
-        
+
         // If we don't have at least 5 products AND we're not in production, add from random pool
         if (this.featuredProducts.length < 5 && !environment.production) {
           if (randomPool.length > 0) {
@@ -256,7 +274,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       },
       (error) => {
         console.error('Error loading featured products:', error);
-        
+
         if (!environment.production) {
           // Only in development mode - add random products if API call fails
           if (randomPool.length > 0) {
@@ -274,14 +292,14 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       }
     );
   }
-  
+
   // Load new products with random supplementation
   private loadNewWithRandomProducts(randomPool: Product[]) {
     this.productService.getNewProducts().subscribe(
       (products) => {
         // Start with the new products from API
         this.newProducts = products;
-        
+
         // If we don't have at least 5 products AND we're not in production, add from random pool
         if (this.newProducts.length < 5 && !environment.production) {
           if (randomPool.length > 0) {
@@ -298,7 +316,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       },
       (error) => {
         console.error('Error loading new products:', error);
-        
+
         if (!environment.production) {
           // Only in development mode - add random products if API call fails
           if (randomPool.length > 0) {
@@ -316,14 +334,14 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       }
     );
   }
-  
+
   // Load sale products with random supplementation
   private loadSaleWithRandomProducts(randomPool: Product[]) {
     this.productService.getOnSaleProducts().subscribe(
       (products) => {
         // Start with the sale products from API
         this.onSaleProducts = products;
-        
+
         // If we don't have at least 5 products AND we're not in production, add from random pool
         if (this.onSaleProducts.length < 5 && !environment.production) {
           if (randomPool.length > 0) {
@@ -340,7 +358,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       },
       (error) => {
         console.error('Error loading sale products:', error);
-        
+
         if (!environment.production) {
           // Only in development mode - add random products if API call fails
           if (randomPool.length > 0) {
@@ -358,7 +376,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       }
     );
   }
-  
+
   // Get additional random products for a specific section
   private getRandomProductsForSection(section: 'featured' | 'new' | 'sale', count: number) {
     // Do not make API calls for random products in production
@@ -366,13 +384,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       console.log(`In production mode - not making additional API calls for ${section} section`);
       return;
     }
-    
+
     // Make a new API call to get random products (development mode only)
     this.productService.getRandomProducts(count * 2).subscribe(
       (randomProducts) => {
         // Take only what we need
         const productsToAdd = randomProducts.slice(0, count);
-        
+
         // Add to the appropriate section
         if (section === 'featured') {
           this.featuredProducts = [...this.featuredProducts, ...productsToAdd];
@@ -387,13 +405,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       },
       (error) => {
         console.error(`Error getting additional random products for ${section} section:`, error);
-        
+
         // Get products from other categories as a last resort - no demos
         this.getProductsFromOtherSections(section, count);
       }
     );
   }
-  
+
   // Last resort - get products from other sections that already have products
   private getProductsFromOtherSections(section: 'featured' | 'new' | 'sale', count: number) {
     // Don't borrow products in production mode
@@ -401,28 +419,28 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       console.log(`In production mode - not borrowing products from other sections for ${section} section`);
       return;
     }
-    
+
     // Find products from other sections we can use
     let borrowFromSections: Product[] = [];
-    
+
     if (section !== 'featured' && this.featuredProducts.length > 0) {
       borrowFromSections = [...borrowFromSections, ...this.featuredProducts];
     }
-    
+
     if (section !== 'new' && this.newProducts.length > 0) {
       borrowFromSections = [...borrowFromSections, ...this.newProducts];
     }
-    
+
     if (section !== 'sale' && this.onSaleProducts.length > 0) {
       borrowFromSections = [...borrowFromSections, ...this.onSaleProducts];
     }
-    
+
     // If we found products in other sections, use them
     if (borrowFromSections.length > 0) {
       // Shuffle to get different products each time
       const shuffled = borrowFromSections.sort(() => 0.5 - Math.random());
       const borrowedProducts = shuffled.slice(0, count);
-      
+
       if (section === 'featured') {
         this.featuredProducts = [...this.featuredProducts, ...borrowedProducts];
         console.log(`Borrowed ${borrowedProducts.length} products from other sections for featured products`);
@@ -475,10 +493,10 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.featuredProducts = [];
     this.newProducts = [];
     this.onSaleProducts = [];
-    
+
     // Load data with skeleton loading
     this.loadData();
-    
+
     // Complete the refresh after data is loaded
     setTimeout(() => {
       event.target.complete();
@@ -495,7 +513,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     });
     toast.present();
   }
-  
+
   // Get product image URL with proper handling for Arabic text
   getProductImageUrl(product: any): string {
     try {
@@ -503,7 +521,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       if (product && product.src) {
         return product.src;
       }
-      
+
       // Check if product has images
       if (product && product.images && product.images.length > 0) {
         return product.images[0].src;
@@ -511,18 +529,18 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     } catch (error) {
       console.error('Error processing image URL', error);
     }
-    
+
     // Return a fallback image if no product images available or error occurs
     return 'assets/images/product-placeholder.svg';
   }
-  
+
   // Handle image load error
   handleImageError(event: Event): void {
     const imgElement = event.target as HTMLImageElement;
-    
+
     // Set a fallback image
     imgElement.src = 'assets/images/product-placeholder.svg';
-    
+
     // Log the error for debugging
     console.error('Image load error:', imgElement.src);
   }
@@ -531,19 +549,19 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   private ensureMinimumProducts(productList: Product[], type: 'featured' | 'new' | 'sale'): void {
     if (productList.length < 5) {
       console.log(`Only got ${productList.length} ${type} products, adding random products from API to reach minimum 5`);
-      
+
       // Create a set of existing product IDs to avoid duplicates
       const existingIds = new Set(productList.map(p => p.id));
-      
+
       // First try to get random real products from API using our improved method
       this.productService.getRandomProducts(10).subscribe(randomProducts => {
         // Filter out duplicates
         const uniqueRandomProducts = randomProducts.filter(p => !existingIds.has(p.id));
-        
+
         if (uniqueRandomProducts.length > 0) {
           // Take only what we need to reach 5 products
           const productsToAdd = uniqueRandomProducts.slice(0, 5 - productList.length);
-          
+
           // Add the random products to our list
           productList.push(...productsToAdd);
           console.log(`Added ${productsToAdd.length} real API products to ${type} products`);
@@ -553,7 +571,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
           this.productService.getRandomProducts(20).subscribe(
             moreRandomProducts => {
               const moreUniqueProducts = moreRandomProducts.filter(p => !existingIds.has(p.id));
-              
+
               if (moreUniqueProducts.length > 0) {
                 const moreToAdd = moreUniqueProducts.slice(0, 5 - productList.length);
                 productList.push(...moreToAdd);
@@ -577,7 +595,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       });
     }
   }
-  
+
   // Try to get real products from other categories before falling back to demo
   private addRealProductsFromOtherCategories(productList: Product[], type: 'featured' | 'new' | 'sale', existingIds: Set<number>): void {
     // Try the opposite type of products (if we need featured, try on sale, etc.)
@@ -589,9 +607,9 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     } else {
       otherType = 'new';
     }
-    
+
     console.log(`Trying to get real products from ${otherType} category for ${type}`);
-    
+
     // Get products from another category
     if (otherType === 'featured') {
       this.productService.getFeaturedProducts(10).subscribe(
@@ -610,12 +628,12 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       );
     }
   }
-  
+
   // Handle products from another category 
   private handleOtherCategoryProducts(otherProducts: Product[], productList: Product[], type: 'featured' | 'new' | 'sale', existingIds: Set<number>): void {
     // Filter duplicates
     const uniqueOtherProducts = otherProducts.filter(p => !existingIds.has(p.id));
-    
+
     if (uniqueOtherProducts.length > 0) {
       // Take only what we need
       const otherToAdd = uniqueOtherProducts.slice(0, 5 - productList.length);
@@ -626,7 +644,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.addDemoProductsToList(productList, type, existingIds);
     }
   }
-  
+
   // Helper method to add demo products when API calls fail
   private addDemoProductsToList(productList: Product[], type: 'featured' | 'new' | 'sale', existingIds: Set<number>): void {
     // Never use demo products in production mode
@@ -636,7 +654,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const mockDataService = this.productService['mockDataService'];
-    
+
     if (type === 'featured') {
       mockDataService.getFeaturedProducts().subscribe(products => {
         const demoProducts = products.filter(p => !existingIds.has(p.id)).slice(0, 5 - productList.length);
@@ -657,7 +675,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       });
     }
   }
-  
+
   // This was moved to the end of the file to avoid duplication
 
   // Load real products when a specific API call fails
@@ -665,7 +683,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     // First try to get random products from the API using our improved method
     this.productService.getRandomProducts(10).subscribe(randomProducts => {
       console.log(`Got ${randomProducts.length} random products from API for ${type}`);
-      
+
       if (randomProducts.length >= 5) {
         // We have enough products, use them
         if (type === 'featured') {
@@ -686,7 +704,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.tryOtherCategoryProductsBeforeFallback(type, []);
     });
   }
-  
+
   // Try to get products from other categories before falling back to demo
   private tryOtherCategoryProductsBeforeFallback(type: 'featured' | 'new' | 'sale', existingProducts: Product[]): void {
     // Use a different category than the one that failed
@@ -698,9 +716,9 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     } else {
       otherType = 'featured';
     }
-    
+
     console.log(`Trying ${otherType} products as replacements for ${type}`);
-    
+
     // Try to get products from another category
     if (otherType === 'featured') {
       this.productService.getFeaturedProducts(10).subscribe(
@@ -708,7 +726,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
           if (otherProducts.length > 0) {
             // We have some products, use them
             const productsToUse = [...existingProducts, ...otherProducts].slice(0, 5);
-            
+
             if (type === 'featured') {
               this.featuredProducts = productsToUse;
             } else if (type === 'new') {
@@ -716,7 +734,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
             } else if (type === 'sale') {
               this.onSaleProducts = productsToUse;
             }
-            
+
             console.log(`Used ${productsToUse.length} products from other categories for ${type}`);
           } else {
             // Still not enough, fall back to demo
@@ -731,7 +749,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
           if (otherProducts.length > 0) {
             // We have some products, use them
             const productsToUse = [...existingProducts, ...otherProducts].slice(0, 5);
-            
+
             if (type === 'featured') {
               this.featuredProducts = productsToUse;
             } else if (type === 'new') {
@@ -739,7 +757,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
             } else if (type === 'sale') {
               this.onSaleProducts = productsToUse;
             }
-            
+
             console.log(`Used ${productsToUse.length} products from other categories for ${type}`);
           } else {
             // Still not enough, fall back to demo
@@ -754,7 +772,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
           if (otherProducts.length > 0) {
             // We have some products, use them
             const productsToUse = [...existingProducts, ...otherProducts].slice(0, 5);
-            
+
             if (type === 'featured') {
               this.featuredProducts = productsToUse;
             } else if (type === 'new') {
@@ -762,7 +780,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
             } else if (type === 'sale') {
               this.onSaleProducts = productsToUse;
             }
-            
+
             console.log(`Used ${productsToUse.length} products from other categories for ${type}`);
           } else {
             // Still not enough, fall back to demo
@@ -773,7 +791,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       );
     }
   }
-  
+
   // Fallback to demo products when API doesn't provide enough products
   private finalFallbackToDemoProducts(type: 'featured' | 'new' | 'sale', existingProducts: Product[]): void {
     // Never use demo products in production mode
@@ -790,7 +808,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const mockDataService = this.productService['mockDataService'];
-    
+
     if (type === 'featured') {
       mockDataService.getFeaturedProducts().subscribe(demoProducts => {
         // If we already have some products, only add what we need to reach 5

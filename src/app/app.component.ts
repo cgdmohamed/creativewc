@@ -37,6 +37,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private routerSubscription: Subscription;
   showMenu: boolean = true; // Controls whether to show the menu
   private authPages = ['/login', '/register', '/forgot-password', '/otp', '/verify-otp', '/reset-password'];
+  private config: any;
 
   constructor(
     private platform: Platform,
@@ -67,7 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
       console.error('Error creating storage:', error);
     });
   }
-  
+
   // Setup router event listener to toggle menu visibility
   private setupRouterListener() {
     this.routerSubscription = this.router.events
@@ -75,7 +76,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe((event: NavigationEnd) => {
         // Check if current route is an auth page
         this.showMenu = !this.authPages.some(page => event.url.includes(page));
-        
+
         // Close menu if on auth page
         if (!this.showMenu) {
           this.menuController.close('main-menu');
@@ -87,7 +88,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Log environment information
     console.log(`App running in ${environment.production ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
     console.log(`Environment settings: API URL=${environment.apiUrl}, useDemoData=${environment.useDemoData}`);
-    
+
     // Storage is already initialized in constructor
 
     // Wait for configuration to load first
@@ -109,7 +110,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Initialize services that depend on storage
     await this.themeService.initialize();
     await this.cartService.initialize();
-    
+
     // Initialize notifications - this will load stored notifications
     await this.notificationService.initPushNotifications();
 
@@ -120,7 +121,7 @@ export class AppComponent implements OnInit, OnDestroy {
         document.documentElement.dir = config.isRTL ? "rtl" : "ltr";
       },
     );
-    
+
     // Test API connectivity if on mobile platform
     this.testApiConnectivity();
 
@@ -155,7 +156,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.splashHiddenSubscription) {
       this.splashHiddenSubscription.unsubscribe();
     }
-    
+
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
     }
@@ -167,15 +168,15 @@ export class AppComponent implements OnInit, OnDestroy {
   private initializeOneSignal() {
     // Make sure we have the secret key
     const appId = environment.oneSignalAppId || '';
-    
+
     if (!window.OneSignal || !appId) {
       console.warn('OneSignal not available or app ID missing');
       return;
     }
-    
+
     try {
       console.log('Initializing OneSignal with app ID:', appId);
-      
+
       // Set app ID
       window.OneSignal.init({
         appId: appId,
@@ -185,18 +186,18 @@ export class AppComponent implements OnInit, OnDestroy {
         allowLocalhostAsSecureOrigin: true,
         androidChannelId: null // Let OneSignal use default channel
       });
-      
+
       // Prompt user for notification permission
       window.OneSignal.showSlidedownPrompt();
-      
+
       // Handle notification open events
       window.OneSignal.setNotificationOpenedHandler((jsonData: any) => {
         console.log('Notification opened:', jsonData);
-        
+
         // Navigate to notifications page or specific content based on data
         if (jsonData.notification && jsonData.notification.additionalData) {
           const data = jsonData.notification.additionalData;
-          
+
           // Handle different notification types (order updates, etc)
           if (data.orderId) {
             this.router.navigate(['/tabs/orders', data.orderId]);
@@ -208,7 +209,7 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         }
       });
-      
+
       console.log('OneSignal initialized successfully');
     } catch (error) {
       console.error('Error initializing OneSignal:', error);
@@ -219,7 +220,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Log environment details again to ensure it's captured
     console.log(`[initializeApp] App running in ${environment.production ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
     console.log(`[initializeApp] Demo data usage setting: ${environment.useDemoData}`);
-    
+
     this.platform.ready().then(async () => {
       try {
         // Configure status bar (for mobile devices only)
@@ -228,36 +229,36 @@ export class AppComponent implements OnInit, OnDestroy {
             await StatusBar.setBackgroundColor({ color: '#ec1c24' }); // Set red color matching the theme
             await StatusBar.setStyle({ style: Style.Light }); // Light text for dark background
             await StatusBar.setOverlaysWebView({ overlay: false }); // Don't overlay the webview
-            
+
             // Initialize OneSignal for push notifications on native platforms
             this.initializeOneSignal();
           } catch (err) {
             console.error('Error configuring status bar:', err);
           }
         }
-      
+
         // Try to get token and user from JWT auth
         const token = await this.jwtAuthService.getToken();
         const user = await this.jwtAuthService.getUser();
-        
+
         // Always restore user session if we have user data, regardless of token status
         if (user) {
           console.log('User data found in storage, restoring session');
-          
+
           // Force update of the user subject to ensure components know we're logged in
           this.jwtAuthService.setCurrentUser(user);
-          
+
           // If we're on an auth page but we're already logged in, redirect to home
           if (this.authPages.some(page => window.location.href.includes(page))) {
             console.log('User is already logged in, redirecting to home');
             this.router.navigate(['/']);
           }
         }
-        
+
         // Try to refresh token if we have one, but don't make login status dependent on it
         if (token) {
           console.log('JWT token found, verifying...');
-          
+
           // Refresh token in the background
           this.jwtAuthService.refreshToken().subscribe({
             next: () => {
@@ -296,7 +297,7 @@ export class AppComponent implements OnInit, OnDestroy {
   async logout() {
     // Unregister device from notifications
     await this.notificationService.unregisterDevice();
-    
+
     // Clear sessions and data
     // Only use JWT logout
     this.jwtAuthService.logout().subscribe({
@@ -308,7 +309,7 @@ export class AppComponent implements OnInit, OnDestroy {
         // Don't fall back to legacy logout, just log the error
       }
     });
-    
+
     this.cartService.clearCart();
     this.menuController.close("main-menu");
 
@@ -321,17 +322,17 @@ export class AppComponent implements OnInit, OnDestroy {
 
     await toast.present();
   }
-  
+
   /**
    * Test API connectivity and show alert if there are issues
    */
   async testApiConnectivity() {
     console.log('Testing API connectivity...');
-    
+
     this.connectivityTester.runAllTests().subscribe(
       async (result) => {
         console.log('Connectivity test results:', result);
-        
+
         if (!result.overallSuccess) {
           // Only show alert in mobile environments
           if (this.platform.is('capacitor') || this.platform.is('cordova') || this.platform.is('hybrid')) {
@@ -340,7 +341,7 @@ export class AppComponent implements OnInit, OnDestroy {
               subHeader: 'Network Connectivity Problem',
               message: `We're having trouble connecting to our servers. 
                      ${result.message}
-                     
+
                      Please check your internet connection and try again.`,
               buttons: ['OK']
             });
@@ -354,7 +355,7 @@ export class AppComponent implements OnInit, OnDestroy {
       },
       async (error) => {
         console.error('Error running connectivity tests:', error);
-        
+
         // Only show alert in mobile environments
         if (this.platform.is('capacitor') || this.platform.is('cordova') || this.platform.is('hybrid')) {
           const alert = await this.alertController.create({
@@ -367,5 +368,96 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       }
     );
+  }
+
+  private async initializeLanguage() {
+    try {
+      // Set default language from config
+      if (this.config.regional?.defaultLanguage) {
+        this.languageService.setDefaultLanguage(this.config.regional.defaultLanguage);
+      }
+
+      // Set supported languages from config
+      if (this.config.regional?.supportedLanguages) {
+        this.languageService.setSupportedLanguages(this.config.regional.supportedLanguages);
+      }
+
+      await this.languageService.initializeLanguage();
+    } catch (error) {
+      console.error('Language initialization error:', error);
+    }
+  }
+
+  private async initializeTheme() {
+    try {
+      if (this.config.theme) {
+        // Apply theme from configuration
+        if (this.config.theme.primaryColor) {
+          document.documentElement.style.setProperty('--ion-color-primary', this.config.theme.primaryColor);
+        }
+
+        if (this.config.theme.secondaryColor) {
+          document.documentElement.style.setProperty('--ion-color-secondary', this.config.theme.secondaryColor);
+        }
+
+        // Apply dark mode if configured
+        if (this.config.theme.darkMode) {
+          document.body.classList.add('dark');
+        }
+      }
+    } catch (error) {
+      console.error('Theme initialization error:', error);
+    }
+  }
+
+  private setAppMetadata() {
+    try {
+      // Set document title
+      if (this.config.app?.appName) {
+        document.title = this.config.app.appName;
+      }
+
+      // Set meta description
+      if (this.config.app?.storeDescription) {
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+          metaDescription = document.createElement('meta');
+          metaDescription.setAttribute('name', 'description');
+          document.head.appendChild(metaDescription);
+        }
+        metaDescription.setAttribute('content', this.config.app.storeDescription);
+      }
+
+      // Set viewport for RTL support if enabled
+      if (this.config.features?.enableRtl) {
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport && this.languageService.isRTL()) {
+          document.documentElement.dir = 'rtl';
+        }
+      }
+    } catch (error) {
+      console.error('Error setting app metadata:', error);
+    }
+  }
+
+  private initializeOneSignal() {
+    try {
+      // Make sure we have the secret key
+      const appId = environment.oneSignalAppId || '';
+    
+      if (!window.OneSignal || !appId) {
+        console.warn('OneSignal not available or app ID missing');
+        return;
+      }
+      
+      if (typeof window !== 'undefined' && window.OneSignal && this.config.notifications?.oneSignalAppId) {
+        window.OneSignal.init({
+          appId: this.config.notifications.oneSignalAppId,
+          allowLocalhostAsSecureOrigin: !environment.production,
+        });
+      }
+    } catch (error) {
+      console.error('OneSignal initialization error:', error);
+    }
   }
 }
