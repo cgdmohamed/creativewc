@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { User } from '../interfaces/user.interface';
 import { Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { ConfigService } from './config.service';
 
 interface AuthResponse {
   success: boolean;
@@ -38,12 +39,12 @@ export class JwtAuthService {
   // Platform detection
   private isMobile: boolean;
   private isProduction = environment.production;
-  
+
   // API URL configuration - will be set based on platform
   private baseUrl: string;
   private apiUrl: string; 
   private authCode = environment.authCode;
-  
+
   // Token refresh timer
   private tokenRefreshTimer: any;
 
@@ -53,15 +54,17 @@ export class JwtAuthService {
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   public isLoading$ = this.isLoadingSubject.asObservable();
 
+  private jwtUrl: string;
+
   constructor(
     private http: HttpClient,
     private storage: Storage,
     private platform: Platform,
-    private router: Router
+    private router: Router,
+    private configService: ConfigService
   ) {
-    // Detect if we're on a mobile device (Capacitor/Cordova)
     this.isMobile = this.platform.is('hybrid') || this.platform.is('capacitor') || this.platform.is('cordova');
-    
+
     // Set URLs based on platform
     if (this.isMobile || this.isProduction) {
       // For mobile devices, use full URL
@@ -76,10 +79,29 @@ export class JwtAuthService {
       this.apiUrl = `/wp-json/simple-jwt-login/v1`; // Direct relative path to the JWT endpoint
       console.log('JWT Auth: Using relative API URL for web development:', this.apiUrl);
     }
-    
+
+    this.initializeJwtUrl();
     this.init();
   }
-  
+
+  /**
+   * Initialize JWT URL from unified config or fallback to environment
+   */
+  private initializeJwtUrl(): void {
+    const config = this.configService.getConfig();
+
+    if (config?.store?.jwtAuthUrl) {
+      this.jwtUrl = config.store.jwtAuthUrl;
+      console.log('JWT Auth service: Using unified config JWT URL:', this.jwtUrl);
+    } else if (config?.store?.wordpressUrl) {
+      this.jwtUrl = `${config.store.wordpressUrl}/wp-json/simple-jwt-login/v1`;
+      console.log('JWT Auth service: Using unified config WordPress URL for JWT:', this.jwtUrl);
+    } else {
+      this.jwtUrl = `${environment.storeUrl}/wp-json/simple-jwt-login/v1`;
+      console.log('JWT Auth service: Using environment WordPress URL for JWT:', this.jwtUrl);
+    }
+  }
+
   /**
    * Initialize the service
    */
@@ -87,7 +109,7 @@ export class JwtAuthService {
     // Create the storage database first
     await this.storage.create();
     console.log('JWT Auth service: Storage initialized');
-    
+
     // Then load auth data
     await this.loadAuthData();
   }
@@ -99,7 +121,7 @@ export class JwtAuthService {
   get isAuthenticated(): boolean {
     return this.currentUserSubject.value !== null;
   }
-  
+
   /**
    * Set the current user (used for restoring session)
    */
@@ -108,7 +130,7 @@ export class JwtAuthService {
       this.currentUserSubject.next(user);
     }
   }
-  
+
   /**
    * Update user data in storage and current user subject
    */
@@ -131,20 +153,20 @@ export class JwtAuthService {
       // HARDCODED: Ensure user has ID 95 if a valid user exists in storage
       if (user) {
         console.log('User data found in storage, restoring session');
-        
+
         // Force user ID to 95 regardless of what was stored
         user.id = 95;
-        
+
         // Update storage with modified user
         await this.storage.set(this.AUTH_USER_KEY, user);
-        
+
         console.log('User ID hardcoded to 95 in loadAuthData');
         this.currentUserSubject.next(user);
       }
 
       if (token) {
         console.log('JWT token found, verifying...');
-        
+
         // Try to refresh the token to make sure it's still valid, but don't block user session
         this.refreshToken().subscribe({
           next: () => {
@@ -170,7 +192,7 @@ export class JwtAuthService {
   getUserAsObservable(): Observable<User | null> {
     return from(this.getUser());
   }
-  
+
   /**
    * Create a minimal user object with basic user data
    */
@@ -231,10 +253,10 @@ export class JwtAuthService {
     formData.append('email', email);
     formData.append('password', password);
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth`, formData).pipe(
+    return this.http.post<AuthResponse>(`${this.jwtUrl}/auth`, formData).pipe(
       switchMap(response => {
         console.log('Login response:', response);
-        
+
         if (!response.success) {
           throw new Error(response.error || response.message || 'Login failed');
         }
@@ -256,7 +278,7 @@ export class JwtAuthService {
       }),
       tap(user => {
         this.isLoadingSubject.next(false);
-        
+
         // Note: we're not handling redirects here anymore.
         // The login page component handles redirection after successful login
         // based on query parameters and localStorage
@@ -285,25 +307,25 @@ export class JwtAuthService {
     formData.append('AUTH_KEY', this.authCode);
     formData.append('email', userData.email);
     formData.append('password', userData.password);
-    
+
     if (userData.first_name) {
       formData.append('first_name', userData.first_name);
     }
-    
+
     if (userData.last_name) {
       formData.append('last_name', userData.last_name);
     }
-    
+
     if (userData.username) {
       formData.append('username', userData.username);
     } else {
       formData.append('username', userData.email); // Use email as username if not provided
     }
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/users`, formData).pipe(
+    return this.http.post<AuthResponse>(`${this.jwtUrl}/users`, formData).pipe(
       switchMap(response => {
         console.log('Registration response:', response);
-        
+
         // Check for success response
         if (response && (response.success === false || response.error)) {
           throw new Error(response.error || response.message || 'Registration failed');
@@ -312,17 +334,17 @@ export class JwtAuthService {
         // If we have a success response but no JWT, we need to login to get the JWT
         if (response.success && response.message && response.message.includes('User was')) {
           console.log('Registration successful, attempting automatic login');
-          
+
           // Auto-login after successful registration
           const loginFormData = new FormData();
           loginFormData.append('AUTH_KEY', this.authCode);
           loginFormData.append('email', userData.email);
           loginFormData.append('password', userData.password);
-          
-          return this.http.post<AuthResponse>(`${this.apiUrl}/auth`, loginFormData).pipe(
+
+          return this.http.post<AuthResponse>(`${this.jwtUrl}/auth`, loginFormData).pipe(
             switchMap(loginResponse => {
               console.log('Auto-login response:', loginResponse);
-              
+
               // Store JWT if present
               let token: string = '';
               if (loginResponse.data?.jwt) {
@@ -332,7 +354,7 @@ export class JwtAuthService {
                 token = loginResponse.jwt;
                 this.storage.set(this.AUTH_TOKEN_KEY, token);
               }
-              
+
               // Fetch user profile from WooCommerce
               return this.fetchUserProfile(userData.email);
             }),
@@ -343,7 +365,7 @@ export class JwtAuthService {
               const minimalUser = this.createMinimalUser(userData);
               this.storage.set(this.AUTH_USER_KEY, minimalUser);
               this.currentUserSubject.next(minimalUser);
-              
+
               // Make sure to redirect if we're on an auth page
               if (this.router) {
                 setTimeout(() => {
@@ -354,12 +376,12 @@ export class JwtAuthService {
                   }
                 }, 500);
               }
-              
+
               return of(minimalUser);
             })
           );
         }
-        
+
         // Standard flow if we got JWT in registration response
         if (response && response.jwt) {
           this.storage.set(this.AUTH_TOKEN_KEY, response.jwt);
@@ -372,7 +394,7 @@ export class JwtAuthService {
           this.currentUserSubject.next(user);
           return of(user);
         }
-        
+
         // Create minimal user as fallback
         const minimalUser = this.createMinimalUser(userData);
         this.storage.set(this.AUTH_USER_KEY, minimalUser);
@@ -409,7 +431,7 @@ export class JwtAuthService {
         formData.append('AUTH_KEY', this.authCode);
         formData.append('JWT', token);
 
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/revoke`, formData).pipe(
+        return this.http.post<AuthResponse>(`${this.jwtUrl}/auth/revoke`, formData).pipe(
           tap(() => this.clearAuthData()),
           map(() => true), // Return success regardless of server response
           catchError(() => {
@@ -457,7 +479,7 @@ export class JwtAuthService {
     formData.append('AUTH_KEY', this.authCode);
     formData.append('email', email);
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/users/reset_password`, formData).pipe(
+    return this.http.post<AuthResponse>(`${this.jwtUrl}/users/reset_password`, formData).pipe(
       map(response => {
         if (!response.success) {
           throw new Error(response.error || response.message || 'Password reset request failed');
@@ -487,7 +509,7 @@ export class JwtAuthService {
     formData.append('code', resetCode);
     formData.append('new_password', newPassword);
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/users/reset_password/code`, formData).pipe(
+    return this.http.post<AuthResponse>(`${this.jwtUrl}/users/reset_password/code`, formData).pipe(
       map(response => {
         if (!response.success) {
           throw new Error(response.error || response.message || 'Password reset failed');
@@ -526,7 +548,7 @@ export class JwtAuthService {
         formData.append('old_password', oldPassword);
         formData.append('new_password', newPassword);
 
-        return this.http.post<AuthResponse>(`${this.apiUrl}/users/change_password`, formData, { headers }).pipe(
+        return this.http.post<AuthResponse>(`${this.jwtUrl}/users/change_password`, formData, { headers }).pipe(
           map(response => {
             if (!response.success) {
               throw new Error(response.error || response.message || 'Password change failed');
@@ -552,7 +574,7 @@ export class JwtAuthService {
   refreshToken(forceRefresh: boolean = false): Observable<string> {
     // Clear any existing refresh timer
     this.clearTokenRefreshTimer();
-    
+
     return from(Promise.all([
       this.getToken(),
       this.storage.get(this.AUTH_TOKEN_EXPIRY_KEY)
@@ -566,7 +588,7 @@ export class JwtAuthService {
         const now = Date.now();
         const tokenExpiry = expiryTime ? parseInt(expiryTime) : now;
         const shouldRefresh = forceRefresh || !expiryTime || (tokenExpiry - now < this.TOKEN_REFRESH_THRESHOLD_MS);
-        
+
         if (!shouldRefresh) {
           console.log('Token is still valid, no need to refresh');
           // Set up refresh timer for future refresh
@@ -575,13 +597,13 @@ export class JwtAuthService {
         }
 
         console.log('Refreshing token...');
-        
+
         // Create FormData object for multipart/form-data submission
         const formData = new FormData();
         formData.append('AUTH_KEY', this.authCode);
         formData.append('JWT', token);
 
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/refresh`, formData).pipe(
+        return this.http.post<AuthResponse>(`${this.jwtUrl}/auth/refresh`, formData).pipe(
           map(response => {
             if (!response.success || !response.data?.jwt) {
               throw new Error(response.error || 'Failed to refresh token');
@@ -591,14 +613,14 @@ export class JwtAuthService {
             // JWT standard is to have an 'exp' claim in seconds
             // But our server might not provide this, so we estimate
             const newExpiryTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours in milliseconds
-            
+
             // Store the new token and its expiry time
             this.storage.set(this.AUTH_TOKEN_KEY, response.data.jwt);
             this.storage.set(this.AUTH_TOKEN_EXPIRY_KEY, newExpiryTime.toString());
-            
+
             // Schedule the next token refresh
             this.scheduleTokenRefresh(newExpiryTime);
-            
+
             console.log('Token refreshed successfully');
             return response.data.jwt;
           }),
@@ -611,7 +633,7 @@ export class JwtAuthService {
       })
     );
   }
-  
+
   /**
    * Schedule token refresh before it expires
    * @param expiryTime Timestamp when the token expires
@@ -619,15 +641,15 @@ export class JwtAuthService {
   private scheduleTokenRefresh(expiryTime: number): void {
     // Clear any existing timer
     this.clearTokenRefreshTimer();
-    
+
     // Calculate time until refresh (5 minutes before expiry)
     const now = Date.now();
     const refreshTime = expiryTime - this.TOKEN_REFRESH_THRESHOLD_MS;
     const timeUntilRefresh = Math.max(0, refreshTime - now);
-    
+
     if (timeUntilRefresh > 0) {
       console.log(`Scheduling token refresh in ${timeUntilRefresh/1000} seconds`);
-      
+
       // Set timer to refresh token
       this.tokenRefreshTimer = setTimeout(() => {
         console.log('Auto refreshing token...');
@@ -638,7 +660,7 @@ export class JwtAuthService {
       }, timeUntilRefresh);
     }
   }
-  
+
   /**
    * Clear token refresh timer
    */
@@ -658,22 +680,22 @@ export class JwtAuthService {
     formData.append('AUTH_KEY', this.authCode);
     formData.append('JWT', token);
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/validate`, formData).pipe(
+    return this.http.post<AuthResponse>(`${this.jwtUrl}/auth/validate`, formData).pipe(
       map(response => {
         if (!response.success || !response.data?.user) {
           throw new Error(response.error || 'Token validation failed');
         }
 
         const user = response.data.user as User;
-        
+
         // HARDCODED: Ensure user ID is 95 regardless of the response
         user.id = 95;
         console.log('User ID hardcoded to 95 in validateToken method');
-        
+
         // Store user data
         this.storage.set(this.AUTH_USER_KEY, user);
         this.currentUserSubject.next(user);
-        
+
         return user;
       })
     );
@@ -692,7 +714,7 @@ export class JwtAuthService {
    */
   async getUser(): Promise<User> {
     let user = await this.storage.get(this.AUTH_USER_KEY);
-    
+
     if (user) {
       // HARDCODED: Ensure user always has ID 95
       if (user.id !== 95) {
@@ -702,10 +724,10 @@ export class JwtAuthService {
         await this.storage.set(this.AUTH_USER_KEY, user);
       }
     }
-    
+
     return user || null as any;
   }
-  
+
   /**
    * Fetch user profile from WooCommerce API using consumer keys
    * If profile fetch fails, we'll still keep the user logged in with a minimal profile
@@ -720,22 +742,22 @@ export class JwtAuthService {
           this.currentUserSubject.next(minimalUser);
           return of(minimalUser);
         }
-        
+
         try {
           // WooCommerce API requires consumer key/secret authentication
           const consumerKey = environment.consumerKey;
           const consumerSecret = environment.consumerSecret;
-          
+
           // Use the WooCommerce REST API to fetch the user by email
           // Construct the URL carefully to avoid double wp-json segments
           const apiBaseUrl = this.isMobile || this.isProduction 
             ? `https://${environment.storeUrl}/wp-json/wc/v3` 
             : `${environment.apiUrl}`;
-          
+
           return this.http.get<User>(`${apiBaseUrl}/customers?email=${email}&consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`).pipe(
             map((customers: any) => {
               console.log('User profile response:', customers);
-              
+
               if (Array.isArray(customers) && customers.length > 0) {
                 const user = customers[0] as User;
                 // HARDCODED: Ensure user ID is set to 95 regardless of the API response

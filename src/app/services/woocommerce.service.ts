@@ -2,14 +2,18 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, retry, tap, map } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { Observable, of, throwError } from 'rxjs';
+import { retry, catchError } from 'rxjs/operators';
+import { ToastController, Platform } from '@ionic/angular';
+
 import { Product } from '../interfaces/product.interface';
 import { Category } from '../interfaces/category.interface';
 import { Order } from '../interfaces/order.interface';
 import { AuthService } from './auth.service';
-import { ToastController, Platform } from '@ionic/angular';
+import { ConfigService } from './config.service';
+import { environment } from '../../environments/environment';
+
+// Import demo data
 import { demoProducts } from '../demo/demo-products';
 import { demoCategories } from '../demo/demo-categories';
 
@@ -21,12 +25,12 @@ export class WoocommerceService {
   private apiUrl: string;
   private consumerKey = environment.consumerKey;
   private consumerSecret = environment.consumerSecret;
-  
+
   // Use environment settings for demo mode
   private useDemo = environment.useDemoData;
   private isProduction = environment.production;
   private isMobile: boolean;
-  
+
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -35,7 +39,7 @@ export class WoocommerceService {
   ) {
     // Detect if we're on a mobile device (Capacitor/Cordova)
     this.isMobile = this.platform.is('hybrid') || this.platform.is('capacitor') || this.platform.is('cordova');
-    
+
     // Use absolute URL for mobile apps, otherwise use the relative URL for web development
     if (this.isMobile || this.isProduction) {
       this.apiUrl = `https://${environment.storeUrl}/wp-json/wc/v3`;
@@ -44,10 +48,10 @@ export class WoocommerceService {
       this.apiUrl = environment.apiUrl;
       console.log('WooCommerce service: Using relative API URL for web development:', this.apiUrl);
     }
-    
+
     console.log('WooCommerce service initialized');
     console.log(`Running on ${this.isMobile ? 'MOBILE device' : 'WEB browser'}`);
-    
+
     // In production builds, always use real data unless explicitly enabled
     if (this.isProduction) {
       this.useDemo = false;
@@ -67,35 +71,35 @@ export class WoocommerceService {
     // If in demo mode, return demo products directly
     if (this.useDemo) {
       console.log('Using demo products data');
-      
+
       let filteredProducts = [...demoProducts];
-      
+
       // Apply filters
       if (options.featured) {
         filteredProducts = filteredProducts.filter(p => p.featured);
       }
-      
+
       if (options.on_sale) {
         filteredProducts = filteredProducts.filter(p => p.on_sale);
       }
-      
+
       if (options.orderby === 'date' && options.order === 'desc') {
         filteredProducts = filteredProducts.sort((a, b) => 
           new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
         );
       }
-      
+
       // Limit results if per_page is set
       if (options.per_page) {
         filteredProducts = filteredProducts.slice(0, parseInt(options.per_page));
       }
-      
+
       return of(filteredProducts);
     }
-    
+
     // Otherwise, call the API
     const params = this.createParams(options);
-    
+
     return this.http.get<Product[]>(`${this.apiUrl}/products`, { params })
       .pipe(
         retry(2),
@@ -124,7 +128,7 @@ export class WoocommerceService {
       // If product not found, return the first one
       return of(demoProducts[0]);
     }
-    
+
     return this.http.get<Product>(`${this.apiUrl}/products/${productId}`, {
       params: this.createParams()
     }).pipe(
@@ -150,9 +154,9 @@ export class WoocommerceService {
       console.log('Using demo categories data');
       return of(demoCategories);
     }
-    
+
     const params = this.createParams(options);
-    
+
     return this.http.get<Category[]>(`${this.apiUrl}/products/categories`, { params })
       .pipe(
         retry(2),
@@ -176,27 +180,27 @@ export class WoocommerceService {
     // If in demo mode, filter demo products by category
     if (this.useDemo) {
       console.log(`Using demo products for category ${categoryId}`);
-      
+
       const filteredProducts = demoProducts.filter(product => 
         product.categories.some(category => category.id === categoryId)
       );
-      
+
       // Apply additional filters
       let result = [...filteredProducts];
-      
+
       // Limit results if per_page is set
       if (options.per_page) {
         result = result.slice(0, parseInt(options.per_page));
       }
-      
+
       return of(result);
     }
-    
+
     const params = this.createParams({
       ...options,
       category: categoryId
     });
-    
+
     return this.http.get<Product[]>(`${this.apiUrl}/products`, { params })
       .pipe(
         retry(2),
@@ -257,7 +261,7 @@ export class WoocommerceService {
         orderData.customer_id = user.id;
       }
     }
-    
+
     return this.http.post<Order>(`${this.apiUrl}/orders`, orderData, {
       params: this.createParams()
     }).pipe(
@@ -293,9 +297,9 @@ export class WoocommerceService {
     // If in demo mode, do a simple search on product names/descriptions
     if (this.useDemo) {
       console.log(`Using demo products for search: "${searchQuery}"`);
-      
+
       const searchTerms = searchQuery.toLowerCase().split(' ');
-      
+
       // Search in name, description, and short_description
       const filteredProducts = demoProducts.filter(product => {
         const searchText = [
@@ -303,27 +307,27 @@ export class WoocommerceService {
           product.description,
           product.short_description
         ].join(' ').toLowerCase();
-        
+
         // Match if any search term is found
         return searchTerms.some(term => searchText.includes(term));
       });
-      
+
       // Apply additional filters
       let result = [...filteredProducts];
-      
+
       // Limit results if per_page is set
       if (options.per_page) {
         result = result.slice(0, parseInt(options.per_page));
       }
-      
+
       return of(result);
     }
-    
+
     const params = this.createParams({
       ...options,
       search: searchQuery
     });
-    
+
     return this.http.get<Product[]>(`${this.apiUrl}/products`, { params })
       .pipe(
         retry(2),
@@ -346,22 +350,22 @@ export class WoocommerceService {
     if (!productIds || productIds.length === 0) {
       return of([]);
     }
-    
+
     // If in demo mode, filter by product IDs
     if (this.useDemo) {
       console.log(`Using demo products for IDs: ${productIds.join(', ')}`);
-      
+
       const filteredProducts = demoProducts.filter(product => 
         productIds.includes(product.id)
       );
-      
+
       return of(filteredProducts);
     }
-    
+
     const params = this.createParams({
       include: productIds.join(',')
     });
-    
+
     return this.http.get<Product[]>(`${this.apiUrl}/products`, { params })
       .pipe(
         retry(2),
@@ -384,12 +388,12 @@ export class WoocommerceService {
     let params = new HttpParams()
       .set('consumer_key', this.consumerKey)
       .set('consumer_secret', this.consumerSecret);
-    
+
     // Add additional parameters
     Object.keys(additionalParams).forEach(key => {
       params = params.set(key, additionalParams[key]);
     });
-    
+
     return params;
   }
 
@@ -400,7 +404,7 @@ export class WoocommerceService {
    */
   private handleError(message: string, error: HttpErrorResponse): Observable<any> {
     let errorMessage = message;
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side or network error
       errorMessage = `Error: ${error.error.message}`;
@@ -420,13 +424,13 @@ export class WoocommerceService {
           errorMessage = `Error ${error.status}: ${error.message}`;
       }
     }
-    
+
     if (!environment.production) {
       console.log('API Error:', errorMessage, 'Using demo data instead');
     } else {
       console.log('API Error in production:', errorMessage, 'Will NOT use demo data');
     }
-    
+
     // Only use demo data in non-production mode for better UX
     if (this.useDemo && !environment.production) {
       // Return appropriate demo data based on the request
@@ -447,11 +451,11 @@ export class WoocommerceService {
         // Default to all products
         return of(demoProducts);
       }
-      
+
       // For other requests, return empty data
       return of([]);
     }
-    
+
     return throwError(() => new Error(errorMessage));
   }
 
@@ -466,7 +470,7 @@ export class WoocommerceService {
       position: 'bottom',
       color: 'danger'
     });
-    
+
     await toast.present();
   }
 }

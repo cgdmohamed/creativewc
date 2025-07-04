@@ -86,18 +86,31 @@ export class ConfigUsageService {
   }
 
   private validateStoreConfig(): void {
-    if (!this.config.store) return;
+    if (!this.config.store) {
+      console.warn('⚠️ Store configuration missing');
+      return;
+    }
     
     const store = this.config.store;
     console.log('🏪 Store Config:', {
-      storeUrl: store.storeUrl,
-      apiUrl: store.apiUrl,
-      wordpressUrl: store.wordpressUrl,
-      consumerKey: store.consumerKey ? '***' : 'Not set',
-      consumerSecret: store.consumerSecret ? '***' : 'Not set',
-      authCode: store.authCode ? '***' : 'Not set',
-      jwtAuthUrl: store.jwtAuthUrl
+      storeUrl: store.storeUrl || 'Not set',
+      apiUrl: store.apiUrl || 'Not set',
+      wordpressUrl: store.wordpressUrl || 'Not set',
+      consumerKey: store.consumerKey ? '***configured***' : 'Not set',
+      consumerSecret: store.consumerSecret ? '***configured***' : 'Not set',
+      authCode: store.authCode ? '***configured***' : 'Not set',
+      jwtAuthUrl: store.jwtAuthUrl || 'Not set'
     });
+
+    // Validate required store fields
+    const requiredFields = ['storeUrl', 'apiUrl', 'consumerKey', 'consumerSecret'];
+    const missingFields = requiredFields.filter(field => !store[field]);
+    
+    if (missingFields.length > 0) {
+      console.warn('⚠️ Missing required store configuration fields:', missingFields);
+    } else {
+      console.log('✅ All required store configuration fields are present');
+    }
   }
 
   private validateThemeConfig(): void {
