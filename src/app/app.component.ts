@@ -18,6 +18,9 @@ import { ConfigService } from "./services/config.service";
 import { ConfigUsageService } from './services/config-usage.service';
 import { LanguageService } from "./services/language.service";
 import { TranslateService } from "@ngx-translate/core";
+import { SecurityService } from './services/security.service';
+import { PerformanceService } from './services/performance.service';
+import { AnalyticsService } from './services/analytics.service';
 
 
 // Define window with OneSignal for TypeScript

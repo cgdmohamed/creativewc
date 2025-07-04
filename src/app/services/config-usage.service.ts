@@ -68,50 +68,7 @@ export class ConfigUsageService {
     console.log('✅ Configuration validation complete');
   }
 
-  private validateSecurityConfig(): void {
-    if (!this.config.security) {
-      console.warn('⚠️ Security configuration missing');
-      return;
-    }
-    
-    const security = this.config.security;
-    console.log('🔒 Security Config:', {
-      enableCsrf: security.enableCsrf,
-      enableRateLimit: security.enableRateLimit,
-      sessionTimeout: security.sessionTimeout,
-      maxLoginAttempts: security.maxLoginAttempts
-    });
-  }
-
-  private validatePerformanceConfig(): void {
-    if (!this.config.performance) {
-      console.warn('⚠️ Performance configuration missing');
-      return;
-    }
-    
-    const performance = this.config.performance;
-    console.log('⚡ Performance Config:', {
-      enableCaching: performance.enableCaching,
-      cacheTimeout: performance.cacheTimeout,
-      enableImageOptimization: performance.enableImageOptimization,
-      enableLazyLoading: performance.enableLazyLoading
-    });
-  }
-
-  private validateAnalyticsConfig(): void {
-    if (!this.config.analytics) {
-      console.warn('⚠️ Analytics configuration missing');
-      return;
-    }
-    
-    const analytics = this.config.analytics;
-    console.log('📊 Analytics Config:', {
-      enableGoogleAnalytics: analytics.enableGoogleAnalytics,
-      googleAnalyticsId: analytics.googleAnalyticsId ? '***configured***' : 'not set',
-      enableFacebookPixel: analytics.enableFacebookPixel,
-      facebookPixelId: analytics.facebookPixelId ? '***configured***' : 'not set'
-    });
-  }
+  
 
   private validateAppConfig(): void {
     if (!this.config.app) return;
@@ -219,31 +176,7 @@ export class ConfigUsageService {
     console.log('🛠️ Development Config:', development);
   }
 
-  private validateSecurityConfig(): void {
-    if (!this.config.security) return;
-    
-    const security = this.config.security;
-    console.log('🔒 Security Config:', security);
-  }
-
-  private validatePerformanceConfig(): void {
-    if (!this.config.performance) return;
-    
-    const performance = this.config.performance;
-    console.log('⚡ Performance Config:', performance);
-  }
-
-  private validateAnalyticsConfig(): void {
-    if (!this.config.analytics) return;
-    
-    const analytics = this.config.analytics;
-    console.log('📊 Analytics Config:', {
-      enableGoogleAnalytics: analytics.enableGoogleAnalytics,
-      googleAnalyticsId: analytics.googleAnalyticsId ? '***' : 'Not set',
-      enableFacebookPixel: analytics.enableFacebookPixel,
-      facebookPixelId: analytics.facebookPixelId ? '***' : 'Not set'
-    });
-  }
+  
 
   /**
    * Get configuration value by path
