@@ -1,3 +1,4 @@
+
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
@@ -11,6 +12,8 @@ export const environment = {
   wordpressUrl: 'https://your-store.com',
   authCode: 'your-auth-code',
   oneSignalAppId: 'your-onesignal-app-id',
+  moyasarPublishableKey: 'your-moyasar-key',
+  allowDemoCheckout: true,
   useDemoData: false
 };
 

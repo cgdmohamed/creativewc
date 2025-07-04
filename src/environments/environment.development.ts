@@ -1,3 +1,4 @@
+
 export const environment = {
   production: false,
   apiUrl: 'wp-json/wc/v3',
@@ -7,5 +8,7 @@ export const environment = {
   wordpressUrl: 'https://your-store.com',
   authCode: 'your-auth-code',
   oneSignalAppId: 'your-onesignal-app-id',
+  moyasarPublishableKey: 'your-moyasar-key',
+  allowDemoCheckout: true,
   useDemoData: true
 };
