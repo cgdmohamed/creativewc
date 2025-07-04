@@ -1,72 +1,161 @@
+
 {
-  "storeName": "DRZN Shopping",
-  "storeDescription": "Your premier shopping destination",
-  "storeUrl": "https://your-woocommerce-store.com",
-  "apiUrl": "wp-json/wc/v3",
-  "consumerKey": "YOUR_WOOCOMMERCE_CONSUMER_KEY",
-  "consumerSecret": "YOUR_WOOCOMMERCE_CONSUMER_SECRET",
-  
-  "appName": "DRZN Shopping",
-  "appSlogan": "Shop smarter, not harder",
-  "primaryColor": "#ec1c24",
-  "secondaryColor": "#ffffff",
-  "logoUrl": "/assets/images/logo.png",
-  "splashScreenUrl": "/assets/images/splash.png",
-  
-  "enabledPaymentGateways": ["moyasar", "stcpay", "stripe", "paypal"],
-  "defaultCurrency": "USD",
-  "defaultLanguage": "en",
-  "supportedLanguages": ["en", "ar", "es", "fr", "de"],
-  "taxRate": 0.08,
-  "shippingEnabled": true,
-  
-  "smsProviders": ["twilio", "firebase", "messagebird", "taqnyat"],
-  "defaultSmsProvider": "twilio",
-  
-  "twilioConfig": {
-    "accountSid": "",
-    "authToken": "",
-    "verifyServiceSid": "",
-    "fromNumber": ""
+  "app": {
+    "name": "DRZN Shopping",
+    "version": "1.0.0",
+    "appName": "DRZN Shopping",
+    "appSlogan": "Shop smarter, not harder",
+    "storeDescription": "Your premier shopping destination",
+    "logoUrl": "/assets/images/logo.svg",
+    "splashScreenUrl": "/assets/images/splash.svg"
   },
-  
-  "firebaseConfig": {
-    "apiKey": "",
-    "authDomain": "",
-    "projectId": "",
-    "appId": ""
+  "store": {
+    "storeUrl": "https://your-woocommerce-store.com",
+    "apiUrl": "wp-json/wc/v3",
+    "wordpressUrl": "https://your-woocommerce-store.com",
+    "consumerKey": "YOUR_WOOCOMMERCE_CONSUMER_KEY",
+    "consumerSecret": "YOUR_WOOCOMMERCE_CONSUMER_SECRET",
+    "authCode": "your-auth-code",
+    "jwtAuthUrl": "https://your-woocommerce-store.com/wp-json/simple-jwt-login/v1"
   },
-  
-  "messageBirdConfig": {
-    "apiKey": "",
-    "originator": ""
+  "theme": {
+    "primaryColor": "#ffd60a",
+    "secondaryColor": "#003566",
+    "darkMode": false
   },
-  
-  "vonageConfig": {
-    "apiKey": "",
-    "apiSecret": "",
-    "brand": ""
+  "regional": {
+    "defaultCurrency": "USD",
+    "defaultLanguage": "en",
+    "supportedLanguages": ["en", "ar", "es", "fr", "de"],
+    "countryCode": "US",
+    "timezone": "America/New_York",
+    "dateFormat": "MM/dd/yyyy",
+    "taxRate": 0.08,
+    "shippingEnabled": true
   },
-  
-  "awsConfig": {
-    "region": "",
-    "accessKeyId": "",
-    "secretAccessKey": ""
+  "payment": {
+    "enabledPaymentGateways": ["moyasar", "stripe", "paypal", "cod"],
+    "defaultPaymentMethod": "cod",
+    "allowDemoCheckout": false,
+    "gateways": {
+      "stripe": {
+        "publishableKey": "",
+        "secretKey": "",
+        "webhookSecret": "",
+        "enabled": true
+      },
+      "paypal": {
+        "clientId": "",
+        "clientSecret": "",
+        "environment": "sandbox",
+        "enabled": true
+      },
+      "moyasar": {
+        "publishableKey": "",
+        "secretKey": "",
+        "enabled": true
+      },
+      "stcpay": {
+        "merchantId": "",
+        "apiKey": "",
+        "environment": "test",
+        "enabled": false
+      }
+    }
   },
-  
-  "taqnyatConfig": {
-    "apiKey": "",
-    "sender": "DRZN"
+  "sms": {
+    "enabled": true,
+    "defaultProvider": "twilio",
+    "providers": {
+      "twilio": {
+        "enabled": true,
+        "accountSid": "",
+        "authToken": "",
+        "verifyServiceSid": "",
+        "phoneNumber": ""
+      },
+      "firebase": {
+        "enabled": false,
+        "apiKey": "",
+        "authDomain": "",
+        "projectId": "",
+        "storageBucket": "",
+        "messagingSenderId": "",
+        "appId": ""
+      },
+      "messagebird": {
+        "enabled": false,
+        "apiKey": "",
+        "sender": ""
+      },
+      "vonage": {
+        "enabled": false,
+        "apiKey": "",
+        "apiSecret": "",
+        "phoneNumber": ""
+      },
+      "aws": {
+        "enabled": false,
+        "accessKeyId": "",
+        "secretAccessKey": "",
+        "region": "us-east-1",
+        "sender": ""
+      },
+      "taqnyat": {
+        "enabled": false,
+        "apiKey": "",
+        "sender": "DRZN"
+      }
+    }
   },
-  
-  "oneSignalAppId": "YOUR_ONESIGNAL_APP_ID",
-  
-  "countryCode": "US",
-  "timezone": "America/New_York",
-  "dateFormat": "MM/dd/yyyy",
-  
-  "useDemoData": false,
-  
+  "notifications": {
+    "oneSignalAppId": "YOUR_ONESIGNAL_APP_ID",
+    "enablePushNotifications": true,
+    "enableEmailNotifications": true,
+    "enableSmsNotifications": true
+  },
+  "features": {
+    "enableOtp": true,
+    "enableWishlist": true,
+    "enableReviews": true,
+    "enableRecommendations": true,
+    "enableMultiLanguage": true,
+    "enableDarkMode": true,
+    "enableGuestCheckout": true,
+    "enableSocialLogin": false,
+    "enableRtl": true
+  },
+  "development": {
+    "useDemoData": false,
+    "enableDebugMode": false,
+    "enableMockPayments": false,
+    "bypassOtp": false
+  },
+  "security": {
+    "enableCsrf": true,
+    "enableRateLimit": true,
+    "sessionTimeout": 3600,
+    "maxLoginAttempts": 5
+  },
+  "performance": {
+    "enableCaching": true,
+    "cacheTimeout": 300,
+    "enableImageOptimization": true,
+    "enableLazyLoading": true
+  },
+  "analytics": {
+    "enableGoogleAnalytics": false,
+    "googleAnalyticsId": "",
+    "enableFacebookPixel": false,
+    "facebookPixelId": ""
+  },
+  "_meta": {
+    "version": "1.0.0",
+    "lastModified": "2024-01-01T00:00:00Z",
+    "configVersion": "1.0",
+    "author": "DRZN Team",
+    "description": "Unified configuration file for DRZN Shopping App"
+  },
   "_comments": {
     "setup": "Replace YOUR_WOOCOMMERCE_CONSUMER_KEY and YOUR_WOOCOMMERCE_CONSUMER_SECRET with your actual WooCommerce API credentials",
     "storeUrl": "Replace with your actual WooCommerce store URL (including https://)",
@@ -75,6 +164,11 @@
     "currencies": "defaultCurrency supports any ISO currency code (USD, EUR, GBP, SAR, etc.)",
     "languages": "supportedLanguages array determines which languages appear in the language selector",
     "paymentGateways": "enabledPaymentGateways controls which payment options are available",
-    "demo": "Set useDemoData to true for testing without a real WooCommerce store"
+    "demo": "Set useDemoData to true for testing without a real WooCommerce store",
+    "sms": "Configure SMS providers for OTP and notifications",
+    "theme": "Theme configuration for colors and dark mode",
+    "features": "Enable/disable app features",
+    "performance": "Performance optimization settings",
+    "security": "Security and authentication settings"
   }
 }

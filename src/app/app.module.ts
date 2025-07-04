@@ -33,11 +33,12 @@ import { GlobalErrorHandlerService } from './services/global-error-handler.servi
 @NgModule({
   declarations: [AppComponent],
   imports: [
-    BrowserModule, 
+    BrowserModule,
+    HttpClientModule,
     IonicModule.forRoot({
       mode: 'md',
       backButtonText: ''
-    }), 
+    }),
     AppRoutingModule,
     HttpClientModule,
     IonicStorageModule.forRoot(),
