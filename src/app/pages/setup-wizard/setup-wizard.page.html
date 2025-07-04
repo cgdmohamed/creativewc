@@ -1,0 +1,78 @@
+
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Setup Wizard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="setup-container">
+    <ion-progress-bar [value]="currentStep / totalSteps"></ion-progress-bar>
+    
+    <div class="step-indicator">
+      <span>Step {{ currentStep }} of {{ totalSteps }}</span>
+    </div>
+
+    <!-- Step 1: Basic Store Configuration -->
+    <div *ngIf="currentStep === 1" class="setup-step">
+      <h2>Basic Store Configuration</h2>
+      <ion-item>
+        <ion-label position="stacked">Store URL</ion-label>
+        <ion-input [(ngModel)]="config.storeUrl" placeholder="your-store.com"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">App Name</ion-label>
+        <ion-input [(ngModel)]="config.appName" placeholder="My Store App"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Store Name</ion-label>
+        <ion-input [(ngModel)]="config.storeName" placeholder="My Store"></ion-input>
+      </ion-item>
+    </div>
+
+    <!-- Step 2: API Configuration -->
+    <div *ngIf="currentStep === 2" class="setup-step">
+      <h2>WooCommerce API Configuration</h2>
+      <ion-item>
+        <ion-label position="stacked">Consumer Key</ion-label>
+        <ion-input [(ngModel)]="config.consumerKey" placeholder="ck_..."></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Consumer Secret</ion-label>
+        <ion-input [(ngModel)]="config.consumerSecret" placeholder="cs_..."></ion-input>
+      </ion-item>
+    </div>
+
+    <!-- Step 3: Payment Configuration -->
+    <div *ngIf="currentStep === 3" class="setup-step">
+      <h2>Payment Gateway Configuration</h2>
+      <ion-item>
+        <ion-label position="stacked">Moyasar Publishable Key</ion-label>
+        <ion-input [(ngModel)]="config.moyasarPublishableKey" placeholder="pk_..."></ion-input>
+      </ion-item>
+    </div>
+
+    <!-- Step 4: Final Configuration -->
+    <div *ngIf="currentStep === 4" class="setup-step">
+      <h2>Final Configuration</h2>
+      <p>Setup Progress: {{ getSetupProgress() }}%</p>
+      <ion-item>
+        <ion-label>Demo Mode</ion-label>
+        <ion-toggle [(ngModel)]="config.useDemoData"></ion-toggle>
+      </ion-item>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="navigation-buttons">
+      <ion-button *ngIf="currentStep > 1" fill="outline" (click)="previousStep()">
+        Previous
+      </ion-button>
+      <ion-button *ngIf="currentStep < totalSteps" (click)="saveAndContinue()">
+        Next
+      </ion-button>
+      <ion-button *ngIf="currentStep === totalSteps" (click)="completeSetup()">
+        Complete Setup
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

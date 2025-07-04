@@ -628,3 +628,59 @@ export class ConfigService {
     return Math.round((completedFields / (requiredFields.length + 1)) * 100);
   }
 }
+
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ConfigService } from '../../services/config.service';
+import { AppConfig } from '../../interfaces/config.interface';
+
+@Component({
+  selector: 'app-setup-wizard',
+  templateUrl: './setup-wizard.page.html',
+  styleUrls: ['./setup-wizard.page.scss'],
+})
+export class SetupWizardPage implements OnInit {
+  config: AppConfig;
+  currentStep = 1;
+  totalSteps = 4;
+
+  constructor(
+    private configService: ConfigService,
+    private router: Router
+  ) {
+    this.config = this.configService.getConfig();
+  }
+
+  ngOnInit() {
+    // Check if setup is already complete
+    if (this.configService.isSetupComplete()) {
+      this.router.navigate(['/home']);
+    }
+  }
+
+  nextStep() {
+    if (this.currentStep < this.totalSteps) {
+      this.currentStep++;
+    }
+  }
+
+  previousStep() {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
+  }
+
+  saveAndContinue() {
+    this.configService.saveConfig();
+    this.nextStep();
+  }
+
+  completeSetup() {
+    this.configService.saveConfig();
+    this.router.navigate(['/home']);
+  }
+
+  getSetupProgress(): number {
+    return this.configService.getSetupCompletionPercentage();
+  }
+}

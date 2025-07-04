@@ -1,4 +1,5 @@
 
+
 export const environment = {
   production: false,
   // Use local proxy to avoid CORS issues
@@ -26,3 +27,4 @@ export const environment = {
   // Demo data settings
   allowDemoCheckout: true  // Allow checkout flow in demo mode with demonstration UI
 };
+

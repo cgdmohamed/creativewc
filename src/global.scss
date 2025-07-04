@@ -26,8 +26,8 @@
 @import "@ionic/angular/css/flex-utils.css";
 
 /* Custom styles for our app */
-@import "./theme/rtl.scss";
-@import "./theme/fonts.scss";
+@use "./theme/rtl" as *;
+@use "./theme/fonts" as *;
 
 /* Content padding for bottom tabs */
 ion-content {
