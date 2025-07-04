@@ -166,53 +166,52 @@ export class AppComponent implements OnInit, OnDestroy {
    * Initialize OneSignal for push notifications
    */
   private initializeOneSignal() {
-    // Make sure we have the secret key
-    const appId = environment.oneSignalAppId || '';
-
-    if (!window.OneSignal || !appId) {
-      console.warn('OneSignal not available or app ID missing');
-      return;
-    }
-
     try {
-      console.log('Initializing OneSignal with app ID:', appId);
+      // Make sure we have the secret key
+      const appId = environment.oneSignalAppId || '';
+    
+      if (!window.OneSignal || !appId) {
+        console.warn('OneSignal not available or app ID missing');
+        return;
+      }
+      
+      if (typeof window !== 'undefined' && window.OneSignal && this.config?.notifications?.oneSignalAppId) {
+        window.OneSignal.init({
+          appId: this.config.notifications.oneSignalAppId,
+          allowLocalhostAsSecureOrigin: !environment.production,
+          notifyButton: {
+            enable: false,
+          },
+          androidChannelId: null // Let OneSignal use default channel
+        });
 
-      // Set app ID
-      window.OneSignal.init({
-        appId: appId,
-        notifyButton: {
-          enable: false,
-        },
-        allowLocalhostAsSecureOrigin: true,
-        androidChannelId: null // Let OneSignal use default channel
-      });
+        // Prompt user for notification permission
+        window.OneSignal.showSlidedownPrompt();
 
-      // Prompt user for notification permission
-      window.OneSignal.showSlidedownPrompt();
+        // Handle notification open events
+        window.OneSignal.setNotificationOpenedHandler((jsonData: any) => {
+          console.log('Notification opened:', jsonData);
 
-      // Handle notification open events
-      window.OneSignal.setNotificationOpenedHandler((jsonData: any) => {
-        console.log('Notification opened:', jsonData);
+          // Navigate to notifications page or specific content based on data
+          if (jsonData.notification && jsonData.notification.additionalData) {
+            const data = jsonData.notification.additionalData;
 
-        // Navigate to notifications page or specific content based on data
-        if (jsonData.notification && jsonData.notification.additionalData) {
-          const data = jsonData.notification.additionalData;
-
-          // Handle different notification types (order updates, etc)
-          if (data.orderId) {
-            this.router.navigate(['/tabs/orders', data.orderId]);
-          } else if (data.type === 'promotion') {
-            this.router.navigate(['/tabs/home']);
-          } else {
-            // Default to notifications list
-            this.router.navigate(['/tabs/notifications']);
+            // Handle different notification types (order updates, etc)
+            if (data.orderId) {
+              this.router.navigate(['/tabs/orders', data.orderId]);
+            } else if (data.type === 'promotion') {
+              this.router.navigate(['/tabs/home']);
+            } else {
+              // Default to notifications list
+              this.router.navigate(['/tabs/notifications']);
+            }
           }
-        }
-      });
+        });
 
-      console.log('OneSignal initialized successfully');
+        console.log('OneSignal initialized successfully');
+      }
     } catch (error) {
-      console.error('Error initializing OneSignal:', error);
+      console.error('OneSignal initialization error:', error);
     }
   }
 
@@ -372,16 +371,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private async initializeLanguage() {
     try {
-      // Set default language from config
-      if (this.config.regional?.defaultLanguage) {
-        this.languageService.setDefaultLanguage(this.config.regional.defaultLanguage);
-      }
-
-      // Set supported languages from config
-      if (this.config.regional?.supportedLanguages) {
-        this.languageService.setSupportedLanguages(this.config.regional.supportedLanguages);
-      }
-
+      // Set default language from config - just use the language service's initializeLanguage method
       await this.languageService.initializeLanguage();
     } catch (error) {
       console.error('Language initialization error:', error);
@@ -437,27 +427,6 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       console.error('Error setting app metadata:', error);
-    }
-  }
-
-  private initializeOneSignal() {
-    try {
-      // Make sure we have the secret key
-      const appId = environment.oneSignalAppId || '';
-    
-      if (!window.OneSignal || !appId) {
-        console.warn('OneSignal not available or app ID missing');
-        return;
-      }
-      
-      if (typeof window !== 'undefined' && window.OneSignal && this.config.notifications?.oneSignalAppId) {
-        window.OneSignal.init({
-          appId: this.config.notifications.oneSignalAppId,
-          allowLocalhostAsSecureOrigin: !environment.production,
-        });
-      }
-    } catch (error) {
-      console.error('OneSignal initialization error:', error);
     }
   }
 }

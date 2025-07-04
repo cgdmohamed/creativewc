@@ -8,6 +8,7 @@ import { ProductService } from '../services/product.service';
 import { CartService } from '../services/cart.service';
 import { WishlistService } from '../services/wishlist.service';
 import { NotificationService } from '../services/notification.service';
+import { ConfigService } from '../services/config.service';
 import { environment } from '../../environments/environment';
 
 // Required for Swiper
@@ -92,7 +93,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private notificationService: NotificationService,
     private toastController: ToastController,
     private alertController: AlertController,
-    private router: Router
+    private router: Router,
+    private configService: ConfigService
   ) {
     this.cartSubscription = this.cartService.cart.subscribe(cart => {
       this.cartItemCount = cart.itemCount;
