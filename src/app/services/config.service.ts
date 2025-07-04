@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AppConfig } from '../interfaces/config.interface';
+import { ThemeService } from './theme.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ export class ConfigService {
   private config: AppConfig;
   private configSubject = new BehaviorSubject<AppConfig | null>(null);
 
-  constructor() {
+  constructor(private themeService: ThemeService) {
     this.loadConfig();
   }
 
@@ -54,6 +55,34 @@ export class ConfigService {
     this.config = { ...this.config, ...newConfig };
     this.saveConfig();
     this.configSubject.next(this.config);
+    
+    // Sync theme changes with ThemeService
+    if (newConfig.theme) {
+      this.syncThemeWithThemeService(newConfig.theme);
+    }
+  }
+
+  /**
+   * Update theme configuration and sync with ThemeService
+   */
+  updateTheme(themeConfig: Partial<{ primaryColor: string; secondaryColor: string; darkMode: boolean }>): void {
+    const updatedTheme = { ...this.config.theme, ...themeConfig };
+    this.updateConfig({ theme: updatedTheme });
+  }
+
+  /**
+   * Sync theme configuration with ThemeService
+   */
+  private syncThemeWithThemeService(themeConfig: any): void {
+    if (themeConfig.primaryColor) {
+      this.themeService.setPrimaryColor(themeConfig.primaryColor);
+    }
+    if (typeof themeConfig.darkMode === 'boolean') {
+      const currentTheme = this.themeService.currentTheme;
+      if (currentTheme.darkMode !== themeConfig.darkMode) {
+        this.themeService.toggleDarkMode();
+      }
+    }
   }
 
   /**
@@ -276,6 +305,27 @@ export class ConfigService {
    */
   exportConfig(): string {
     return JSON.stringify(this.config, null, 2);
+  }
+
+  /**
+   * Update primary color
+   */
+  updatePrimaryColor(color: string): void {
+    this.updateTheme({ primaryColor: color });
+  }
+
+  /**
+   * Update dark mode
+   */
+  updateDarkMode(darkMode: boolean): void {
+    this.updateTheme({ darkMode });
+  }
+
+  /**
+   * Get current theme configuration
+   */
+  getThemeConfig() {
+    return this.config.theme || {};
   }
 
   /**

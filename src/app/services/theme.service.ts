@@ -127,6 +127,11 @@ export class ThemeService {
     this.saveTheme(updatedTheme);
   }
 
+  // Get primary color from configuration
+  getPrimaryColor(): string {
+    return this._themeConfig.getValue().primaryColor;
+  }
+
   // Apply theme settings to the DOM
   private applyTheme(theme: ThemeConfig) {
     // Apply RTL direction
