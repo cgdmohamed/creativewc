@@ -4,12 +4,12 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
+  production: true,
   apiUrl: 'wp-json/wc/v3',
-  storeUrl: 'your-store.com',
-  consumerKey: 'your-consumer-key',
-  consumerSecret: 'your-consumer-secret',
-  wordpressUrl: 'https://your-store.com',
+  storeUrl: 'wc.testcceg.com',
+  consumerKey: 'ck_728c9f4fbeb2ee28cedaff5ae57f90c0e466dc26',
+  consumerSecret: 'cs_3d34e201f1b256a97da74803cd8da72cbb1a1de5',
+  wordpressUrl: 'https://wc.testcceg.com',
   authCode: 'your-auth-code',
   oneSignalAppId: 'your-onesignal-app-id',
   moyasarPublishableKey: 'your-moyasar-key',

@@ -86,7 +86,7 @@ export class ConfigService {
       apiUrl: 'https://your-store.com/wp-json/wc/v3',
       consumerKey: '',
       consumerSecret: '',
-      storeName: 'Your Store Name',
+      name: 'Your Store Name',
       storeDescription: 'Your Store Description',
       wordpressUrl: 'https://your-store.com',
       authCode: '',
@@ -97,8 +97,12 @@ export class ConfigService {
       // App Branding
       appName: 'Your App Name',
       appSlogan: 'Your App Slogan',
+      version: '1.0.0',
+      theme:{
+        darkMode: false,
       primaryColor: '#3880ff',
       secondaryColor: '#3dc2ff',
+      },
       logoUrl: 'assets/logo.png',
       splashScreenUrl: 'assets/splash.png',
 
@@ -145,10 +149,11 @@ export class ConfigService {
       // SMS Provider Configuration
       smsProviders: ['twilio'],
       defaultSmsProvider: 'twilio',
-      twilioConfig: {
+      TwilioConfig: {
         accountSid: '',
         authToken: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        verifyServiceSid: ''
       },
       firebaseConfig: {
         apiKey: '',

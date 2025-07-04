@@ -84,9 +84,29 @@ export interface AppConfig {
   allowDemoCheckout?: boolean;
   useDemoData: boolean;
   enabledPaymentGateways: string[];
+
+  storeDescription:string;
+  jwtAuthUrl?: string;
+  taqnyatApiKey?: string;
+  taqnyatSender?: string;
+  appName?: string;
+  appSlogan?: string;
+  logoUrl?: string;
+  splashScreenUrl?: string;
+  defaultCurrency?: string;
+  defaultLanguage?: string;
+  supportedLanguages: string[];
+  taxRate?: number;
+  shippingEnabled?: boolean;
+  smsProviders?:string[];
+  defaultSmsProvider?: string;
+  countryCode?: string;
+  timezone?: string;
+  dateFormat?: string;
+
   
   // SMS Provider configurations
-  twilioConfig?: TwilioConfig;
+  TwilioConfig?: TwilioConfig;
   firebaseConfig?: FirebaseConfig;
   messageBirdConfig?: MessageBirdConfig;
   vonageConfig?: VonageConfig;
@@ -128,18 +148,32 @@ export interface AppConfig {
 // Default configuration
 export const defaultConfig: AppConfig = {
   name: 'DARZN',
+  appName: 'DARZN App',
+  appSlogan: 'Your App Slogan',
+  storeDescription: 'Your Store Description',
   version: '1.0.0',
   apiUrl: 'wp-json/wc/v3',
   storeUrl: 'your-store.com',
   consumerKey: 'your-consumer-key',
   consumerSecret: 'your-consumer-secret',
   wordpressUrl: 'https://your-store.com',
+  jwtAuthUrl: 'https://your-store.com/wp-json/simple-jwt-login/v1',
   authCode: 'your-auth-code',
   oneSignalAppId: 'your-onesignal-app-id',
   useDemoData: false,
   allowDemoCheckout: false,
   enabledPaymentGateways: ['cod', 'moyasar'],
-  
+  logoUrl: 'assets/logo.png',
+  splashScreenUrl: 'assets/splash.png',
+  defaultCurrency: 'USD',
+  defaultLanguage: 'en',
+  supportedLanguages: ['en', 'ar', 'es', 'fr', 'de'],
+  taxRate: 0.0,
+  shippingEnabled: true,
+  smsProviders: ['twilio', 'firebase', 'messageBird', 'vonage', 'aws', 'taqnyat'],
+  defaultSmsProvider: 'twilio',
+
+
   taqnyatConfig: {
     apiKey: '',
     sender: ''
