@@ -237,10 +237,11 @@ export class ConfigService {
    * Get PayPal configuration (with backward compatibility)
    */
   getPayPalConfig(): { clientId: string; clientSecret: string; environment: 'sandbox' | 'live' } {
+    const configEnvironment = this.config.paymentGateways?.paypal?.environment || 'sandbox';
     return {
       clientId: this.config.paymentGateways?.paypal?.clientId || this.config.paypalClientId || '',
       clientSecret: this.config.paymentGateways?.paypal?.clientSecret || this.config.paypalClientSecret || '',
-      environment: this.config.paymentGateways?.paypal?.environment || 'sandbox'
+      environment: configEnvironment === 'live' ? 'live' : 'sandbox'
     };
   }
 

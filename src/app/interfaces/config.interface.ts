@@ -4,26 +4,34 @@ export interface TwilioConfig {
   accountSid: string;
   authToken: string;
   verifyServiceSid: string;
+  phoneNumber: string;
 }
 
 export interface FirebaseConfig {
   apiKey: string;
+  authDomain: string;
   projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
 }
 
 export interface MessageBirdConfig {
   apiKey: string;
+  sender: string;
 }
 
 export interface VonageConfig {
   apiKey: string;
   apiSecret: string;
+  phoneNumber: string;
 }
 
 export interface AwsConfig {
   accessKeyId: string;
   secretAccessKey: string;
   region: string;
+  sender: string;
 }
 
 export interface TaqnyatConfig {
@@ -41,7 +49,7 @@ export interface StripeConfig {
 export interface PaypalConfig {
   clientId: string;
   clientSecret: string;
-  environment: 'sandbox' | 'production';
+  environment: 'sandbox' | 'live';
 }
 
 export interface MoyasarConfig {
