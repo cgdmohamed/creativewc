@@ -43,6 +43,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   };
   private wishlistSubscription: Subscription;
   private notificationSubscription: Subscription;
+  unreadNotificationCount: number = 0;
 
   // Slider options for banner
   slideOpts = {
@@ -163,23 +164,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     await alert.present();
   }
 
-  async ngOnInit() {
-    this.isLoading = true;
-
-    try {
-      // Load configuration
-      this.config = await this.configService.waitForConfig();
-      this.appName = this.config.app?.appName || 'DRZN Shopping';
-      this.appSlogan = this.config.app?.appSlogan || 'Shop smarter, not harder';
-      this.storeDescription = this.config.app?.storeDescription || 'Your premier shopping destination';
-
-      this.loadData();
-    } catch (error) {
-      console.error('Error loading home data:', error);
-    } finally {
-      this.isLoading = false;
-    }
-  }
+  
 
   ngOnDestroy() {
     if (this.cartSubscription) {
@@ -872,17 +857,18 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.appName = this.config.app?.appName || 'DRZN Shopping';
       this.appSlogan = this.config.app?.appSlogan || 'Shop smarter, not harder';
       this.storeDescription = this.config.app?.storeDescription || 'Your premier shopping destination';
+      
+      this.loadData();
+      this.loadAppConfiguration();
     } catch (error) {
       console.error('Error loading home data:', error);
     } finally {
       this.isLoading = false;
     }
-    this.initializeHomePage();
-    this.loadAppConfiguration();
   }
 
   private loadAppConfiguration(): void {
-    this.configService.config$.subscribe(config => {
+    this.configService.getConfig$().subscribe(config => {
       if (config) {
         // Update page title with app name
         if (config.appName) {

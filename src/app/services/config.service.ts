@@ -196,19 +196,16 @@ export class ConfigService {
   /**
    * Get current configuration
    */
-  getConfig(): AppConfig {
+  getConfig(): any {
     return this.config;
   }
 
-  /**
-   * Get configuration as Observable
-   */
-  getConfig$(): Observable<AppConfig | null> {
+  getConfig$(): Observable<any> {
     return this.configSubject.asObservable();
   }
 
   /**
-   * Check if configuration is loaded
+   * Get configuration as Observable
    */
   isConfigLoaded(): boolean {
     return this.configLoaded;

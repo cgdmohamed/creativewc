@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Storage } from '@ionic/storage-angular';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AppConfigService } from './app-config.service'; // Assuming you have a config service
+import { ConfigService } from './config.service';
 
 export interface Language {
   code: string;
@@ -23,6 +23,7 @@ export class LanguageService {
   private supportedLanguages: string[] = ['ar', 'en', 'fr', 'es', 'de'];
   private currentLanguage: string = 'ar';
   private currentLanguageSubject = new BehaviorSubject<string>(this.currentLanguage);
+  public currentLanguage$ = this.currentLanguageSubject.asObservable();
 
 
   public languages: Language[] = [
@@ -36,7 +37,7 @@ export class LanguageService {
   constructor(
     private translate: TranslateService,
     private storage: Storage,
-    private configService: AppConfigService
+    private configService: ConfigService
   ) {}
 
   /**

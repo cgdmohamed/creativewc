@@ -228,7 +228,7 @@ export class SettingsPage implements OnInit {
   }
 
   private loadConfiguration(): void {
-    this.configService.config$.subscribe(config => {
+    this.configService.getConfig$().subscribe(config => {
       this.config = config;
     });
   }
@@ -240,9 +240,7 @@ export class SettingsPage implements OnInit {
   }
 
   private loadThemeSettings(): void {
-    this.themeService.currentTheme$.subscribe(theme => {
-      this.isDarkMode = theme.darkMode;
-    });
+    this.isDarkMode = this.themeService.currentTheme.darkMode;
   }
 
   getSupportedLanguages(): string {
@@ -265,7 +263,7 @@ export class SettingsPage implements OnInit {
     return methods.join(', ').toUpperCase();
   }
 
-  async changeLanguage(): void {
+  async changeLanguage(): Promise<void> {
     const supportedLanguages = this.config?.regional?.supportedLanguages || this.config?.supportedLanguages || ['en', 'ar'];
 
     const inputs = supportedLanguages.map((lang: string) => ({
@@ -313,7 +311,7 @@ export class SettingsPage implements OnInit {
     this.themeService.toggleDarkMode();
   }
 
-  async viewFullConfiguration(): void {
+  async viewFullConfiguration(): Promise<void> {
     const configText = JSON.stringify(this.config, null, 2);
     const alert = await this.alertController.create({
       header: 'Full Configuration',
@@ -324,7 +322,7 @@ export class SettingsPage implements OnInit {
     await alert.present();
   }
 
-  async resetConfiguration(): void {
+  async resetConfiguration(): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Reset Configuration',
       message: 'Are you sure you want to reset the configuration to defaults?',

@@ -15,7 +15,7 @@ export class ConfigUsageService {
     private themeService: ThemeService,
     private languageService: LanguageService
   ) {
-    this.configService.config$.subscribe(config => {
+    this.configService.getConfig$().subscribe(config => {
       if (config) {
         this.config = config;
         this.validateConfigUsage();

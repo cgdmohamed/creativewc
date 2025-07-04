@@ -20,7 +20,7 @@ export class ThemeService {
     primaryColor: '#E9324A', // DARZN primary color
     textSize: 'medium' // Default text size
   });
-  
+
   // Create dedicated subject for dark mode for easier subscription
   private _darkMode = new BehaviorSubject<boolean>(false);
 
@@ -42,6 +42,10 @@ export class ThemeService {
 
   get currentTheme() {
     return this._themeConfig.getValue();
+  }
+
+  get currentTheme$() {
+    return this._themeConfig.asObservable();
   }
 
   async loadSavedTheme() {
@@ -72,27 +76,27 @@ export class ThemeService {
       primaryColor: '#E9324A',
       textSize: 'medium'
     };
-    
+
     this._themeConfig.next(defaultTheme);
     this._darkMode.next(defaultTheme.darkMode);
     this.saveTheme(defaultTheme);
   }
-  
+
   // Add getter for darkMode observable for easier subscription
   get darkMode() {
     return this._darkMode.asObservable();
   }
-  
+
   // Get the current text size
   getTextSize(): string {
     return this._themeConfig.getValue().textSize || 'medium';
   }
-  
+
   // Set text size
   setTextSize(size: string) {
     const currentTheme = this._themeConfig.getValue();
     const updatedTheme = { ...currentTheme, textSize: size };
-    
+
     this._themeConfig.next(updatedTheme);
     this.applyTheme(updatedTheme);
     this.saveTheme(updatedTheme);
@@ -102,7 +106,7 @@ export class ThemeService {
   setRTL(isRTL: boolean) {
     const currentTheme = this._themeConfig.getValue();
     const updatedTheme = { ...currentTheme, isRTL };
-    
+
     this._themeConfig.next(updatedTheme);
     this.applyTheme(updatedTheme);
     this.saveTheme(updatedTheme);
@@ -113,7 +117,7 @@ export class ThemeService {
     const currentTheme = this._themeConfig.getValue();
     const updatedDarkMode = !currentTheme.darkMode;
     const updatedTheme = { ...currentTheme, darkMode: updatedDarkMode };
-    
+
     this._themeConfig.next(updatedTheme);
     this._darkMode.next(updatedDarkMode); // Update the dedicated subject
     this.applyTheme(updatedTheme);
@@ -124,7 +128,7 @@ export class ThemeService {
   setPrimaryColor(color: string) {
     const currentTheme = this._themeConfig.getValue();
     const updatedTheme = { ...currentTheme, primaryColor: color };
-    
+
     this._themeConfig.next(updatedTheme);
     this.applyTheme(updatedTheme);
     this.saveTheme(updatedTheme);
@@ -139,17 +143,17 @@ export class ThemeService {
   private applyTheme(theme: ThemeConfig) {
     // Apply RTL direction
     document.documentElement.dir = theme.isRTL ? 'rtl' : 'ltr';
-    
+
     // Apply dark mode
     if (theme.darkMode) {
       document.body.classList.add('dark');
     } else {
       document.body.classList.remove('dark');
     }
-    
+
     // Apply primary color and all its variants
     this.applyColorVariants('primary', theme.primaryColor);
-    
+
     // Apply secondary color if provided
     if (theme.secondaryColor) {
       this.applyColorVariants('secondary', theme.secondaryColor);
@@ -185,20 +189,20 @@ export class ThemeService {
 
     // Set base color
     document.documentElement.style.setProperty(`--ion-color-${colorName}`, hexColor);
-    
+
     // Set RGB values
     document.documentElement.style.setProperty(`--ion-color-${colorName}-rgb`, `${rgb.r},${rgb.g},${rgb.b}`);
-    
+
     // Set contrast color
     const contrast = this.getContrastColor(rgb.r, rgb.g, rgb.b);
     document.documentElement.style.setProperty(`--ion-color-${colorName}-contrast`, contrast);
     document.documentElement.style.setProperty(`--ion-color-${colorName}-contrast-rgb`, 
       contrast === '#ffffff' ? '255,255,255' : '0,0,0');
-    
+
     // Set shade (darker version)
     const shade = this.shadeColor(hexColor, -20);
     document.documentElement.style.setProperty(`--ion-color-${colorName}-shade`, shade);
-    
+
     // Set tint (lighter version)
     const tint = this.shadeColor(hexColor, 20);
     document.documentElement.style.setProperty(`--ion-color-${colorName}-tint`, tint);
