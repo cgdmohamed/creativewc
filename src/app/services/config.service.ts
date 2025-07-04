@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -27,7 +26,7 @@ export class ConfigService {
     try {
       // First try to load from localStorage (user customizations)
       const savedConfig = localStorage.getItem('app-config');
-      
+
       if (savedConfig) {
         this.config = JSON.parse(savedConfig);
         this.configLoaded = true;
@@ -38,7 +37,7 @@ export class ConfigService {
 
       // Load from unified config file
       const configData = await this.http.get<any>('/assets/config/app-config.json').toPromise();
-      
+
       if (configData) {
         this.config = this.transformUnifiedConfig(configData);
         this.configLoaded = true;
@@ -218,18 +217,18 @@ export class ConfigService {
   /**
    * Wait for configuration to load
    */
-  waitForConfig(): Promise<AppConfig> {
+  async waitForConfig(): Promise<AppConfig> {
+    if (this.configLoaded) {
+      return this.config;
+    }
+
     return new Promise((resolve) => {
-      if (this.configLoaded) {
-        resolve(this.config);
-      } else {
-        const subscription = this.configSubject.subscribe(config => {
-          if (config) {
-            subscription.unsubscribe();
-            resolve(config);
-          }
-        });
-      }
+      const subscription = this.configSubject.subscribe((config) => {
+        if (config && this.configLoaded) {
+          subscription.unsubscribe();
+          resolve(config);
+        }
+      });
     });
   }
 
@@ -240,7 +239,7 @@ export class ConfigService {
     this.config = { ...this.config, ...newConfig };
     this.saveConfig();
     this.configSubject.next(this.config);
-    
+
     // Sync theme changes with ThemeService
     if (newConfig.theme) {
       this.syncThemeWithThemeService(newConfig.theme);
@@ -292,118 +291,9 @@ export class ConfigService {
   }
 
   /**
-   * Get current configuration
-   */
-  getConfig(): AppConfig {
-    return this.config;
-  }
-
-  /**
-   * Wait for configuration to load
-   */
-  async waitForConfig(): Promise<AppConfig> {
-    if (this.configLoaded) {
-      return this.config;
-    }
-
-    return new Promise((resolve) => {
-      const subscription = this.configSubject.subscribe((config) => {
-        if (config && this.configLoaded) {
-          subscription.unsubscribe();
-          resolve(config);
-        }
-      });
-    });
-  }
-
-  /**
    * Save configuration to localStorage
    */
   private saveConfig(): void {
-    localStorage.setItem('app-config', JSON.stringify(this.config));
-  }
-
-  /**
-   * Get default configuration
-   */
-  private getDefaultConfig(): AppConfig {
-    return {
-      name: 'DARZN',
-      version: '1.0.0',
-      apiUrl: 'wp-json/wc/v3',
-      storeUrl: 'your-store.com',
-      consumerKey: 'your-consumer-key',
-      consumerSecret: 'your-consumer-secret',
-      wordpressUrl: 'https://your-store.com',
-      authCode: 'your-auth-code',
-      oneSignalAppId: 'your-onesignal-app-id',
-      useDemoData: false,
-      enabledPaymentGateways: ['cod'],
-      storeDescription: 'Your Store Description',
-      supportedLanguages: ['en', 'ar'],
-      theme: {
-        primaryColor: '#ec1c24',
-        secondaryColor: '#003566',
-        darkMode: false
-      },
-      features: {
-        enablePushNotifications: true,
-        enableOtp: true,
-        enableWishlist: true,
-        enableReviews: true
-      },
-      paymentMethods: {
-        cod: true,
-        stripe: false,
-        paypal: false,
-        moyasar: false
-      }
-    };
-  }
-
-  /**
-   * Export configuration as JSON string
-   */
-  exportConfig(): string {
-    return JSON.stringify(this.config, null, 2);
-  }
-
-  /**
-   * Import configuration from JSON string
-   */
-  importConfig(jsonString: string): { success: boolean; message: string } {
-    try {
-      const newConfig = JSON.parse(jsonString);
-      this.updateConfig(newConfig);
-      return { success: true, message: 'Configuration imported successfully' };
-    } catch (error) {
-      return { success: false, message: 'Invalid JSON format' };
-    }
-  }
-
-  /**
-   * Reset configuration to defaults
-   */
-  async resetConfig(): Promise<void> {
-    this.config = this.getDefaultConfig();
-    this.saveConfig();
-    this.configSubject.next(this.config);
-    this.syncThemeWithThemeService(this.config.theme);
-  }
-
-  /**
-   * Reload configuration from file
-   */
-  async reloadConfig(): Promise<void> {
-    localStorage.removeItem('app-config');
-    this.configLoaded = false;
-    await this.loadConfig();
-  }
-
-  /**
-   * Save configuration to localStorage
-   */
-  saveConfig(): void {
     try {
       localStorage.setItem('app-config', JSON.stringify(this.config));
     } catch (error) {
@@ -412,28 +302,7 @@ export class ConfigService {
   }
 
   /**
-   * Reset configuration to defaults from unified config file
-   */
-  async resetConfig(): Promise<void> {
-    try {
-      localStorage.removeItem('app-config');
-      await this.loadConfig();
-    } catch (error) {
-      console.error('Error resetting config:', error);
-      this.config = this.getDefaultConfig();
-      this.configSubject.next(this.config);
-    }
-  }
-
-  /**
-   * Reload configuration from unified config file
-   */
-  async reloadConfig(): Promise<void> {
-    await this.loadConfig();
-  }
-
-  /**
-   * Get default configuration (fallback)
+   * Get default configuration
    */
   private getDefaultConfig(): AppConfig {
     return {
@@ -509,7 +378,7 @@ export class ConfigService {
   importConfig(configJson: string): { success: boolean; message: string } {
     try {
       const importedConfig = JSON.parse(configJson);
-      
+
       if (!importedConfig.storeUrl || !importedConfig.appName) {
         return { success: false, message: 'Invalid configuration file' };
       }
@@ -522,6 +391,27 @@ export class ConfigService {
     } catch (error: any) {
       return { success: false, message: `Import failed: ${error.message}` };
     }
+  }
+
+  /**
+   * Reset configuration to defaults from unified config file
+   */
+  async resetConfig(): Promise<void> {
+    try {
+      localStorage.removeItem('app-config');
+      await this.loadConfig();
+    } catch (error) {
+      console.error('Error resetting config:', error);
+      this.config = this.getDefaultConfig();
+      this.configSubject.next(this.config);
+    }
+  }
+
+  /**
+   * Reload configuration from unified config file
+   */
+  async reloadConfig(): Promise<void> {
+    await this.loadConfig();
   }
 
   /**

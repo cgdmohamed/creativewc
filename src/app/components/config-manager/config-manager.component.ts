@@ -1,4 +1,9 @@
+` tags.
 
+Here's the combined code:
+
+```
+<replit_final_file>
 import { Component, OnInit } from '@angular/core';
 import { ToastController, AlertController } from '@ionic/angular';
 import { ConfigService } from '../../services/config.service';
@@ -65,41 +70,12 @@ import { AppConfig } from '../../interfaces/config.interface';
           </ion-card-content>
         </ion-card>
 
-        <!-- Payment Methods -->
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Payment Methods</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-item>
-              <ion-checkbox [(ngModel)]="paymentGateways.cod" (ionChange)="updatePaymentGateways()"></ion-checkbox>
-              <ion-label>Cash on Delivery</ion-label>
-            </ion-item>
-            <ion-item>
-              <ion-checkbox [(ngModel)]="paymentGateways.stripe" (ionChange)="updatePaymentGateways()"></ion-checkbox>
-              <ion-label>Stripe</ion-label>
-            </ion-item>
-            <ion-item>
-              <ion-checkbox [(ngModel)]="paymentGateways.paypal" (ionChange)="updatePaymentGateways()"></ion-checkbox>
-              <ion-label>PayPal</ion-label>
-            </ion-item>
-            <ion-item>
-              <ion-checkbox [(ngModel)]="paymentGateways.moyasar" (ionChange)="updatePaymentGateways()"></ion-checkbox>
-              <ion-label>Moyasar</ion-label>
-            </ion-item>
-          </ion-card-content>
-        </ion-card>
-
         <!-- Store Configuration -->
         <ion-card>
           <ion-card-header>
             <ion-card-title>Store Configuration</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <ion-item>
-              <ion-label position="stacked">Store URL</ion-label>
-              <ion-input [(ngModel)]="config.storeUrl" (ionBlur)="updateConfig()"></ion-input>
-            </ion-item>
             <ion-item>
               <ion-label position="stacked">API URL</ion-label>
               <ion-input [(ngModel)]="config.apiUrl" (ionBlur)="updateConfig()"></ion-input>
@@ -111,27 +87,6 @@ import { AppConfig } from '../../interfaces/config.interface';
             <ion-item>
               <ion-label position="stacked">Consumer Secret</ion-label>
               <ion-input [(ngModel)]="config.consumerSecret" type="password" (ionBlur)="updateConfig()"></ion-input>
-            </ion-item>
-          </ion-card-content>
-        </ion-card>
-
-        <!-- Theme Configuration -->
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Theme Configuration</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-item>
-              <ion-label position="stacked">Primary Color</ion-label>
-              <ion-input type="color" [(ngModel)]="config.theme.primaryColor" (ionChange)="updateTheme()"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">Secondary Color</ion-label>
-              <ion-input type="color" [(ngModel)]="config.theme.secondaryColor" (ionChange)="updateTheme()"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-checkbox [(ngModel)]="config.theme.darkMode" (ionChange)="updateTheme()"></ion-checkbox>
-              <ion-label>Dark Mode</ion-label>
             </ion-item>
           </ion-card-content>
         </ion-card>
@@ -239,11 +194,11 @@ import { AppConfig } from '../../interfaces/config.interface';
     .config-sections {
       padding: 16px;
     }
-    
+
     ion-card {
       margin-bottom: 16px;
     }
-    
+
     ion-item {
       margin-bottom: 8px;
     }
@@ -269,41 +224,16 @@ export class ConfigManagerComponent implements OnInit {
   }
 
   async loadConfig() {
-    this.config = this.configService.getConfig();
-    if (this.config.paymentMethods) {
-      this.paymentGateways = { ...this.config.paymentMethods };
-    }
-  }
-
-  updateConfig() {
-    this.configService.updateConfig(this.config);
-    this.showToast('Configuration updated', 'success');
-  }
-
-  updateTheme() {
-    this.configService.updateTheme(this.config.theme);
-    this.showToast('Theme updated', 'success');
-  }
-
-  updatePaymentGateways() {
-    this.configService.updateConfig({ 
-      paymentMethods: this.paymentGateways,
-      enabledPaymentGateways: Object.keys(this.paymentGateways).filter(key => this.paymentGateways[key])
-    });
-    this.showToast('Payment gateways updated', 'success');ig();
-  }
-
-  async loadConfig() {
     try {
       await this.configService.waitForConfig();
       this.config = { ...this.configService.getConfig() };
-      
+
       // Initialize payment gateways checkboxes
       this.paymentGateways = {
-        cod: this.config.enabledPaymentGateways.includes('cod'),
-        stripe: this.config.enabledPaymentGateways.includes('stripe'),
-        paypal: this.config.enabledPaymentGateways.includes('paypal'),
-        moyasar: this.config.enabledPaymentGateways.includes('moyasar')
+        cod: this.config.enabledPaymentGateways?.includes('cod') || false,
+        stripe: this.config.enabledPaymentGateways?.includes('stripe') || false,
+        paypal: this.config.enabledPaymentGateways?.includes('paypal') || false,
+        moyasar: this.config.enabledPaymentGateways?.includes('moyasar') || false
       };
     } catch (error) {
       console.error('Error loading config:', error);
@@ -327,7 +257,7 @@ export class ConfigManagerComponent implements OnInit {
     if (this.paymentGateways.stripe) enabledGateways.push('stripe');
     if (this.paymentGateways.paypal) enabledGateways.push('paypal');
     if (this.paymentGateways.moyasar) enabledGateways.push('moyasar');
-    
+
     this.config.enabledPaymentGateways = enabledGateways;
     this.updateConfig();
   }
@@ -362,7 +292,7 @@ export class ConfigManagerComponent implements OnInit {
         reader.readAsText(file);
       }
     };
-    input.click();ck();
+    input.click();
   }
 
   async resetConfig() {
@@ -405,6 +335,5 @@ export class ConfigManagerComponent implements OnInit {
       color
     });
     await toast.present();
-  }();
   }
 }
