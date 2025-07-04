@@ -28,6 +28,31 @@ export interface AwsConfig {
 
 export interface TaqnyatConfig {
   apiKey: string;
+  sender: string;
+}
+
+// Payment Gateway Configurations
+export interface StripeConfig {
+  publishableKey: string;
+  secretKey: string;
+  webhookSecret?: string;
+}
+
+export interface PaypalConfig {
+  clientId: string;
+  clientSecret: string;
+  environment: 'sandbox' | 'production';
+}
+
+export interface MoyasarConfig {
+  publishableKey: string;
+  secretKey: string;
+}
+
+export interface StcPayConfig {
+  merchantId: string;
+  apiKey: string;
+  environment: 'test' | 'production';
 }
 
 // App Configuration Interface
@@ -40,10 +65,17 @@ export interface AppConfig {
   consumerSecret: string;
   wordpressUrl: string;
   authCode: string;
+  authToken?: string;
   oneSignalAppId: string;
   moyasarPublishableKey?: string;
+  moyasarSecretKey?: string;
+  stripePublishableKey?: string;
+  stripeSecretKey?: string;
+  paypalClientId?: string;
+  paypalClientSecret?: string;
   allowDemoCheckout?: boolean;
   useDemoData: boolean;
+  enabledPaymentGateways: string[];
   
   // SMS Provider configurations
   twilioConfig?: TwilioConfig;
@@ -52,6 +84,14 @@ export interface AppConfig {
   vonageConfig?: VonageConfig;
   awsConfig?: AwsConfig;
   taqnyatConfig?: TaqnyatConfig;
+  
+  // Payment Gateway configurations
+  paymentGateways?: {
+    stripe?: StripeConfig;
+    paypal?: PaypalConfig;
+    moyasar?: MoyasarConfig;
+    stcpay?: StcPayConfig;
+  };
   
   // Theme and UI
   theme?: {
@@ -90,6 +130,12 @@ export const defaultConfig: AppConfig = {
   oneSignalAppId: 'your-onesignal-app-id',
   useDemoData: false,
   allowDemoCheckout: false,
+  enabledPaymentGateways: ['cod', 'moyasar'],
+  
+  taqnyatConfig: {
+    apiKey: '',
+    sender: ''
+  },
   
   theme: {
     primaryColor: '#ffd60a',
