@@ -125,19 +125,61 @@ export class ConfigUsageService {
   }
 
   private validateRegionalConfig(): void {
-    if (!this.config.regional) return;
+    if (!this.config.regional) {
+      console.warn('⚠️ Regional configuration missing');
+      return;
+    }
     
     const regional = this.config.regional;
     console.log('🌍 Regional Config:', {
-      defaultCurrency: regional.defaultCurrency,
-      defaultLanguage: regional.defaultLanguage,
-      supportedLanguages: regional.supportedLanguages,
-      countryCode: regional.countryCode,
-      timezone: regional.timezone,
-      dateFormat: regional.dateFormat,
-      taxRate: regional.taxRate,
-      shippingEnabled: regional.shippingEnabled
+      defaultCurrency: regional.defaultCurrency || 'USD',
+      defaultLanguage: regional.defaultLanguage || 'en',
+      supportedLanguages: regional.supportedLanguages || ['en', 'ar'],
+      countryCode: regional.countryCode || 'US',
+      timezone: regional.timezone || 'UTC',
+      dateFormat: regional.dateFormat || 'MM/dd/yyyy',
+      taxRate: regional.taxRate || 0.0,
+      shippingEnabled: regional.shippingEnabled !== false
     });
+
+    // Validate required regional fields
+    const requiredFields = ['defaultCurrency', 'defaultLanguage', 'supportedLanguages'];
+    const missingFields = requiredFields.filter(field => !regional[field]);
+    
+    if (missingFields.length > 0) {
+      console.warn('⚠️ Missing required regional configuration fields:', missingFields);
+    } else {
+      console.log('✅ All required regional configuration fields are present');
+    }
+
+    // Validate RTL/LTR language support
+    this.validateLanguageDirectionSupport(regional);
+  }
+
+  private validateLanguageDirectionSupport(regional: any): void {
+    const rtlLanguages = ['ar', 'fa', 'he', 'ur'];
+    const ltrLanguages = ['en', 'es', 'fr', 'de'];
+    
+    const supportedLanguages = regional.supportedLanguages || [];
+    const hasRtlLanguages = supportedLanguages.some((lang: string) => rtlLanguages.includes(lang));
+    const hasLtrLanguages = supportedLanguages.some((lang: string) => ltrLanguages.includes(lang));
+    
+    console.log('🔄 Language Direction Support:', {
+      supportedLanguages: supportedLanguages,
+      hasRtlSupport: hasRtlLanguages,
+      hasLtrSupport: hasLtrLanguages,
+      defaultLanguageDirection: rtlLanguages.includes(regional.defaultLanguage) ? 'RTL' : 'LTR',
+      rtlLanguagesSupported: supportedLanguages.filter((lang: string) => rtlLanguages.includes(lang)),
+      ltrLanguagesSupported: supportedLanguages.filter((lang: string) => ltrLanguages.includes(lang))
+    });
+
+    if (hasRtlLanguages) {
+      console.log('✅ RTL language support detected - RTL styles and services should be active');
+    }
+    
+    if (hasLtrLanguages) {
+      console.log('✅ LTR language support detected');
+    }
   }
 
   private validatePaymentConfig(): void {

@@ -58,11 +58,63 @@ import { LanguageService } from '../../services/language.service';
             </ion-label>
           </ion-item>
 
-          <ion-item>
+          <ion-item button (click)="changeCurrency()">
             <ion-icon name="cash-outline" slot="start"></ion-icon>
             <ion-label>
               <h3>{{ 'CURRENCY' | translate }}</h3>
-              <p>{{ config?.regional?.defaultCurrency || config?.defaultCurrency || 'USD' }}</p>
+              <p>{{ getCurrentCurrencyDisplay() }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item button (click)="changeRegion()">
+            <ion-icon name="globe-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'REGION' | translate }}</h3>
+              <p>{{ getCurrentRegionDisplay() }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="calendar-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'DATE_FORMAT' | translate }}</h3>
+              <p>{{ config?.regional?.dateFormat || 'MM/dd/yyyy' }} ({{ getSampleDate() }})</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="time-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'TIMEZONE' | translate }}</h3>
+              <p>{{ config?.regional?.timezone || 'UTC' }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="calculator-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'TAX_RATE' | translate }}</h3>
+              <p>{{ getTaxRateDisplay() }}%</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="car-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'SHIPPING' | translate }}</h3>
+              <p>{{ config?.regional?.shippingEnabled ? ('ENABLED' | translate) : ('DISABLED' | translate) }}</p>
+            </ion-label>
+            <ion-toggle 
+              [checked]="config?.regional?.shippingEnabled !== false" 
+              (ionChange)="toggleShipping($event)">
+            </ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="swap-horizontal-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ 'TEXT_DIRECTION' | translate }}</h3>
+              <p>{{ getTextDirectionDisplay() }}</p>
             </ion-label>
           </ion-item>
 
@@ -359,6 +411,178 @@ export class SettingsPage implements OnInit {
       'de': 'Deutsch'
     };
     return languageNames[code] || code.toUpperCase();
+  }
+
+  getCurrentCurrencyDisplay(): string {
+    const currency = this.config?.regional?.defaultCurrency || 'USD';
+    const currencyNames: { [key: string]: string } = {
+      'USD': 'US Dollar ($)',
+      'EUR': 'Euro (€)',
+      'GBP': 'British Pound (£)',
+      'SAR': 'Saudi Riyal (ر.س)',
+      'AED': 'UAE Dirham (د.إ)',
+      'QAR': 'Qatari Riyal (ر.ق)',
+      'KWD': 'Kuwaiti Dinar (د.ك)',
+      'BHD': 'Bahraini Dinar (د.ب)',
+      'OMR': 'Omani Rial (ر.ع)',
+      'JOD': 'Jordanian Dinar (د.أ)',
+      'EGP': 'Egyptian Pound (ج.م)'
+    };
+    return currencyNames[currency] || currency;
+  }
+
+  getCurrentRegionDisplay(): string {
+    const countryCode = this.config?.regional?.countryCode || 'US';
+    const countryNames: { [key: string]: string } = {
+      'US': 'United States',
+      'SA': 'Saudi Arabia',
+      'AE': 'United Arab Emirates',
+      'QA': 'Qatar',
+      'KW': 'Kuwait',
+      'BH': 'Bahrain',
+      'OM': 'Oman',
+      'JO': 'Jordan',
+      'EG': 'Egypt',
+      'GB': 'United Kingdom',
+      'DE': 'Germany',
+      'FR': 'France',
+      'ES': 'Spain'
+    };
+    return countryNames[countryCode] || countryCode;
+  }
+
+  getSampleDate(): string {
+    const sampleDate = new Date(2024, 0, 15); // January 15, 2024
+    const dateFormat = this.config?.regional?.dateFormat || 'MM/dd/yyyy';
+    
+    try {
+      if (dateFormat === 'MM/dd/yyyy') {
+        return '01/15/2024';
+      } else if (dateFormat === 'dd/MM/yyyy') {
+        return '15/01/2024';
+      } else if (dateFormat === 'dd.MM.yyyy') {
+        return '15.01.2024';
+      } else {
+        return sampleDate.toLocaleDateString();
+      }
+    } catch (error) {
+      return '01/15/2024';
+    }
+  }
+
+  getTaxRateDisplay(): string {
+    const taxRate = this.config?.regional?.taxRate || 0;
+    return (taxRate * 100).toFixed(1);
+  }
+
+  getTextDirectionDisplay(): string {
+    const isRtl = this.languageService.isRTL();
+    return isRtl ? 'Right to Left (RTL)' : 'Left to Right (LTR)';
+  }
+
+  async changeCurrency(): Promise<void> {
+    const currencies = [
+      { code: 'USD', name: 'US Dollar ($)' },
+      { code: 'EUR', name: 'Euro (€)' },
+      { code: 'GBP', name: 'British Pound (£)' },
+      { code: 'SAR', name: 'Saudi Riyal (ر.س)' },
+      { code: 'AED', name: 'UAE Dirham (د.إ)' },
+      { code: 'QAR', name: 'Qatari Riyal (ر.ق)' },
+      { code: 'KWD', name: 'Kuwaiti Dinar (د.ك)' },
+      { code: 'BHD', name: 'Bahraini Dinar (د.ب)' },
+      { code: 'OMR', name: 'Omani Rial (ر.ع)' },
+      { code: 'JOD', name: 'Jordanian Dinar (د.أ)' },
+      { code: 'EGP', name: 'Egyptian Pound (ج.م)' }
+    ];
+
+    const inputs = currencies.map(currency => ({
+      name: 'currency',
+      type: 'radio',
+      label: currency.name,
+      value: currency.code,
+      checked: (this.config?.regional?.defaultCurrency || 'USD') === currency.code
+    }));
+
+    const alert = await this.alertController.create({
+      header: 'Select Currency',
+      inputs: inputs as any,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'OK',
+          handler: (currency: string) => {
+            this.updateRegionalConfig({ defaultCurrency: currency });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async changeRegion(): Promise<void> {
+    const regions = [
+      { code: 'US', name: 'United States' },
+      { code: 'SA', name: 'Saudi Arabia' },
+      { code: 'AE', name: 'United Arab Emirates' },
+      { code: 'QA', name: 'Qatar' },
+      { code: 'KW', name: 'Kuwait' },
+      { code: 'BH', name: 'Bahrain' },
+      { code: 'OM', name: 'Oman' },
+      { code: 'JO', name: 'Jordan' },
+      { code: 'EG', name: 'Egypt' },
+      { code: 'GB', name: 'United Kingdom' },
+      { code: 'DE', name: 'Germany' },
+      { code: 'FR', name: 'France' },
+      { code: 'ES', name: 'Spain' }
+    ];
+
+    const inputs = regions.map(region => ({
+      name: 'region',
+      type: 'radio',
+      label: region.name,
+      value: region.code,
+      checked: (this.config?.regional?.countryCode || 'US') === region.code
+    }));
+
+    const alert = await this.alertController.create({
+      header: 'Select Region',
+      inputs: inputs as any,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'OK',
+          handler: (countryCode: string) => {
+            this.updateRegionalConfig({ countryCode });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async toggleShipping(event: any): Promise<void> {
+    const shippingEnabled = event.detail.checked;
+    this.updateRegionalConfig({ shippingEnabled });
+  }
+
+  private updateRegionalConfig(updates: any): void {
+    const currentRegional = this.config?.regional || {};
+    const updatedRegional = { ...currentRegional, ...updates };
+    
+    this.configService.updateSection('regional', updatedRegional);
+    
+    // Update local config reference
+    if (this.config) {
+      this.config.regional = updatedRegional;
+    }
   }
 
   toggleDarkMode(event: any): void {
