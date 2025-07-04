@@ -1,0 +1,139 @@
+{
+  "APP": {
+    "TITLE": "DRZN Shopping",
+    "SLOGAN": "Compra más inteligente, no más difícil",
+    "LOADING": "Cargando..."
+  },
+  "HOME": {
+    "WELCOME": "Bienvenido a DRZN Shopping",
+    "FEATURED_PRODUCTS": "Productos Destacados",
+    "NEW_ARRIVALS": "Nuevos Productos",
+    "ON_SALE": "En Oferta",
+    "VIEW_ALL": "Ver Todo"
+  },
+  "PRODUCT": {
+    "ADD_TO_CART": "Añadir al Carrito",
+    "ADD_TO_WISHLIST": "Añadir a Lista de Deseos",
+    "REMOVE_FROM_WISHLIST": "Quitar de Lista de Deseos",
+    "OUT_OF_STOCK": "Sin Stock",
+    "QUANTITY": "Cantidad",
+    "DESCRIPTION": "Descripción",
+    "SPECIFICATIONS": "Especificaciones",
+    "REVIEWS": "Reseñas",
+    "RELATED_PRODUCTS": "Productos Relacionados"
+  },
+  "CART": {
+    "TITLE": "Carrito de Compras",
+    "EMPTY": "Tu carrito está vacío",
+    "CONTINUE_SHOPPING": "Continuar Comprando",
+    "PROCEED_TO_CHECKOUT": "Proceder al Pago",
+    "SUBTOTAL": "Subtotal",
+    "TAX": "Impuestos",
+    "SHIPPING": "Envío",
+    "TOTAL": "Total",
+    "REMOVE": "Eliminar",
+    "UPDATE": "Actualizar"
+  },
+  "CHECKOUT": {
+    "TITLE": "Pago",
+    "SHIPPING_ADDRESS": "Dirección de Envío",
+    "BILLING_ADDRESS": "Dirección de Facturación",
+    "PAYMENT_METHOD": "Método de Pago",
+    "REVIEW_ORDER": "Revisar Pedido",
+    "PLACE_ORDER": "Realizar Pedido",
+    "SAME_AS_SHIPPING": "Igual que dirección de envío"
+  },
+  "ACCOUNT": {
+    "TITLE": "Mi Cuenta",
+    "PROFILE": "Perfil",
+    "ORDERS": "Pedidos",
+    "ADDRESSES": "Direcciones",
+    "WISHLIST": "Lista de Deseos",
+    "SETTINGS": "Configuración",
+    "LOGOUT": "Cerrar Sesión"
+  },
+  "SETTINGS": {
+    "TITLE": "Configuración",
+    "APP_SETTINGS": "Configuración de la App",
+    "LANGUAGE": "Idioma",
+    "LANGUAGE_DESC": "Elige tu idioma preferido",
+    "SELECT_LANGUAGE": "Seleccionar Idioma",
+    "USER_INFO": "Información del Usuario",
+    "DEFAULT_USER": "Usuario",
+    "NO_EMAIL": "Sin dirección de correo",
+    "NOTIFICATIONS": "Notificaciones de la App",
+    "NOTIFICATIONS_DESC": "Controla la configuración de notificaciones en la app",
+    "ENABLE_NOTIFICATIONS": "Activar Notificaciones",
+    "ORDER_NOTIFICATIONS": "Notificaciones de Pedidos",
+    "PROMOTION_NOTIFICATIONS": "Notificaciones de Promociones",
+    "REFRESH_TOKEN": "Actualizar Token de Notificaciones",
+    "DEVICE_ID": "ID del Dispositivo",
+    "GENERAL_SETTINGS": "Configuración General",
+    "THEME": "Tema",
+    "DARK_MODE": "Modo Oscuro",
+    "DATA_SAVING": "Ahorro de Datos",
+    "APP_INFO": "Información de la App",
+    "APP_VERSION": "Versión de la App",
+    "ABOUT": "Acerca de",
+    "VERSION": "Versión",
+    "LOGOUT": "Cerrar Sesión"
+  },
+  "AUTH": {
+    "LOGIN": "Iniciar Sesión",
+    "REGISTER": "Registrarse",
+    "FORGOT_PASSWORD": "¿Olvidaste tu contraseña?",
+    "EMAIL": "Correo Electrónico",
+    "PASSWORD": "Contraseña",
+    "CONFIRM_PASSWORD": "Confirmar Contraseña",
+    "REMEMBER_ME": "Recordarme",
+    "DONT_HAVE_ACCOUNT": "¿No tienes cuenta?",
+    "ALREADY_HAVE_ACCOUNT": "¿Ya tienes cuenta?",
+    "RESET_PASSWORD": "Restablecer Contraseña",
+    "PHONE_NUMBER": "Número de Teléfono",
+    "VERIFY_CODE": "Verificar Código",
+    "SEND_CODE": "Enviar Código"
+  },
+  "NAVIGATION": {
+    "HOME": "Inicio",
+    "SHOP": "Tienda",
+    "CATEGORIES": "Categorías",
+    "CART": "Carrito",
+    "ACCOUNT": "Cuenta",
+    "SEARCH": "Buscar"
+  },
+  "NOTIFICATIONS": {
+    "TITLE": "Notificaciones",
+    "EMPTY": "Sin notificaciones",
+    "MARK_ALL_READ": "Marcar todas como leídas"
+  },
+  "ERRORS": {
+    "GENERAL": "Ocurrió un error",
+    "NETWORK": "Error de red, por favor verifica tu conexión",
+    "NOT_FOUND": "No encontrado",
+    "UNAUTHORIZED": "Acceso no autorizado",
+    "VALIDATION": "Por favor verifica tu entrada e intenta de nuevo"
+  },
+  "BUTTONS": {
+    "OK": "OK",
+    "CANCEL": "Cancelar",
+    "SAVE": "Guardar",
+    "CONFIRM": "Confirmar",
+    "DELETE": "Eliminar",
+    "APPLY": "Aplicar",
+    "CLOSE": "Cerrar",
+    "BACK": "Atrás",
+    "NEXT": "Siguiente"
+  },
+  "COMMON": {
+    "LOADING": "Cargando...",
+    "CURRENCY": "EUR",
+    "YES": "Sí",
+    "NO": "No",
+    "SEARCH": "Buscar",
+    "FILTER": "Filtrar",
+    "SORT": "Ordenar",
+    "DATE": "Fecha",
+    "STATUS": "Estado",
+    "DETAILS": "Detalles"
+  }
+}

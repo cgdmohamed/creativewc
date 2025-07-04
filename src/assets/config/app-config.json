@@ -1,0 +1,80 @@
+{
+  "storeName": "DRZN Shopping",
+  "storeDescription": "Your premier shopping destination",
+  "storeUrl": "https://your-woocommerce-store.com",
+  "apiUrl": "wp-json/wc/v3",
+  "consumerKey": "YOUR_WOOCOMMERCE_CONSUMER_KEY",
+  "consumerSecret": "YOUR_WOOCOMMERCE_CONSUMER_SECRET",
+  
+  "appName": "DRZN Shopping",
+  "appSlogan": "Shop smarter, not harder",
+  "primaryColor": "#ec1c24",
+  "secondaryColor": "#ffffff",
+  "logoUrl": "/assets/images/logo.png",
+  "splashScreenUrl": "/assets/images/splash.png",
+  
+  "enabledPaymentGateways": ["moyasar", "stcpay", "stripe", "paypal"],
+  "defaultCurrency": "USD",
+  "defaultLanguage": "en",
+  "supportedLanguages": ["en", "ar", "es", "fr", "de"],
+  "taxRate": 0.08,
+  "shippingEnabled": true,
+  
+  "smsProviders": ["twilio", "firebase", "messagebird", "taqnyat"],
+  "defaultSmsProvider": "twilio",
+  
+  "twilioConfig": {
+    "accountSid": "",
+    "authToken": "",
+    "verifyServiceSid": "",
+    "fromNumber": ""
+  },
+  
+  "firebaseConfig": {
+    "apiKey": "",
+    "authDomain": "",
+    "projectId": "",
+    "appId": ""
+  },
+  
+  "messageBirdConfig": {
+    "apiKey": "",
+    "originator": ""
+  },
+  
+  "vonageConfig": {
+    "apiKey": "",
+    "apiSecret": "",
+    "brand": ""
+  },
+  
+  "awsConfig": {
+    "region": "",
+    "accessKeyId": "",
+    "secretAccessKey": ""
+  },
+  
+  "taqnyatConfig": {
+    "apiKey": "",
+    "sender": "DRZN"
+  },
+  
+  "oneSignalAppId": "YOUR_ONESIGNAL_APP_ID",
+  
+  "countryCode": "US",
+  "timezone": "America/New_York",
+  "dateFormat": "MM/dd/yyyy",
+  
+  "useDemoData": false,
+  
+  "_comments": {
+    "setup": "Replace YOUR_WOOCOMMERCE_CONSUMER_KEY and YOUR_WOOCOMMERCE_CONSUMER_SECRET with your actual WooCommerce API credentials",
+    "storeUrl": "Replace with your actual WooCommerce store URL (including https://)",
+    "oneSignal": "Replace YOUR_ONESIGNAL_APP_ID with your OneSignal App ID for push notifications",
+    "colors": "primaryColor and secondaryColor support hex color codes",
+    "currencies": "defaultCurrency supports any ISO currency code (USD, EUR, GBP, SAR, etc.)",
+    "languages": "supportedLanguages array determines which languages appear in the language selector",
+    "paymentGateways": "enabledPaymentGateways controls which payment options are available",
+    "demo": "Set useDemoData to true for testing without a real WooCommerce store"
+  }
+}

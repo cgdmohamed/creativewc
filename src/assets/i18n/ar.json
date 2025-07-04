@@ -1,0 +1,139 @@
+{
+  "APP": {
+    "TITLE": "درزن للتسوق",
+    "SLOGAN": "تسوق بذكاء، ليس بجهد",
+    "LOADING": "جاري التحميل..."
+  },
+  "HOME": {
+    "WELCOME": "مرحبًا بكم في درزن للتسوق",
+    "FEATURED_PRODUCTS": "منتجات مميزة",
+    "NEW_ARRIVALS": "وصل حديثًا",
+    "ON_SALE": "تخفيضات",
+    "VIEW_ALL": "عرض الكل"
+  },
+  "PRODUCT": {
+    "ADD_TO_CART": "أضف إلى السلة",
+    "ADD_TO_WISHLIST": "أضف إلى المفضلة",
+    "REMOVE_FROM_WISHLIST": "إزالة من المفضلة",
+    "OUT_OF_STOCK": "نفذت الكمية",
+    "QUANTITY": "الكمية",
+    "DESCRIPTION": "الوصف",
+    "SPECIFICATIONS": "المواصفات",
+    "REVIEWS": "التقييمات",
+    "RELATED_PRODUCTS": "منتجات ذات صلة"
+  },
+  "CART": {
+    "TITLE": "سلة التسوق",
+    "EMPTY": "سلة التسوق فارغة",
+    "CONTINUE_SHOPPING": "مواصلة التسوق",
+    "PROCEED_TO_CHECKOUT": "إتمام الشراء",
+    "SUBTOTAL": "المجموع الفرعي",
+    "TAX": "الضريبة",
+    "SHIPPING": "الشحن",
+    "TOTAL": "الإجمالي",
+    "REMOVE": "إزالة",
+    "UPDATE": "تحديث"
+  },
+  "CHECKOUT": {
+    "TITLE": "إتمام الطلب",
+    "SHIPPING_ADDRESS": "عنوان الشحن",
+    "BILLING_ADDRESS": "عنوان الفواتير",
+    "PAYMENT_METHOD": "طريقة الدفع",
+    "REVIEW_ORDER": "مراجعة الطلب",
+    "PLACE_ORDER": "تأكيد الطلب",
+    "SAME_AS_SHIPPING": "نفس عنوان الشحن"
+  },
+  "ACCOUNT": {
+    "TITLE": "حسابي",
+    "PROFILE": "الملف الشخصي",
+    "ORDERS": "الطلبات",
+    "ADDRESSES": "العناوين",
+    "WISHLIST": "المفضلة",
+    "SETTINGS": "الإعدادات",
+    "LOGOUT": "تسجيل الخروج"
+  },
+  "SETTINGS": {
+    "TITLE": "الإعدادات",
+    "APP_SETTINGS": "إعدادات التطبيق",
+    "LANGUAGE": "اللغة",
+    "LANGUAGE_DESC": "اختر اللغة المفضلة لديك",
+    "SELECT_LANGUAGE": "اختر اللغة",
+    "USER_INFO": "معلومات المستخدم",
+    "DEFAULT_USER": "المستخدم",
+    "NO_EMAIL": "لا يوجد بريد إلكتروني",
+    "NOTIFICATIONS": "إشعارات التطبيق",
+    "NOTIFICATIONS_DESC": "تحكم بإعدادات الإشعارات في التطبيق",
+    "ENABLE_NOTIFICATIONS": "تفعيل الإشعارات",
+    "ORDER_NOTIFICATIONS": "إشعارات الطلبات",
+    "PROMOTION_NOTIFICATIONS": "إشعارات العروض",
+    "REFRESH_TOKEN": "تحديث رمز الإشعارات",
+    "DEVICE_ID": "رمز الجهاز",
+    "GENERAL_SETTINGS": "إعدادات عامة",
+    "THEME": "المظهر",
+    "DARK_MODE": "الوضع الداكن",
+    "DATA_SAVING": "توفير البيانات",
+    "APP_INFO": "معلومات التطبيق",
+    "APP_VERSION": "إصدار التطبيق",
+    "ABOUT": "حول التطبيق",
+    "VERSION": "الإصدار",
+    "LOGOUT": "تسجيل الخروج"
+  },
+  "AUTH": {
+    "LOGIN": "تسجيل الدخول",
+    "REGISTER": "إنشاء حساب",
+    "FORGOT_PASSWORD": "نسيت كلمة المرور؟",
+    "EMAIL": "البريد الإلكتروني",
+    "PASSWORD": "كلمة المرور",
+    "CONFIRM_PASSWORD": "تأكيد كلمة المرور",
+    "REMEMBER_ME": "تذكرني",
+    "DONT_HAVE_ACCOUNT": "ليس لديك حساب؟",
+    "ALREADY_HAVE_ACCOUNT": "لديك حساب بالفعل؟",
+    "RESET_PASSWORD": "إعادة تعيين كلمة المرور",
+    "PHONE_NUMBER": "رقم الهاتف",
+    "VERIFY_CODE": "التحقق من الرمز",
+    "SEND_CODE": "إرسال الرمز"
+  },
+  "NAVIGATION": {
+    "HOME": "الرئيسية",
+    "SHOP": "المتجر",
+    "CATEGORIES": "الفئات",
+    "CART": "السلة",
+    "ACCOUNT": "الحساب",
+    "SEARCH": "البحث"
+  },
+  "NOTIFICATIONS": {
+    "TITLE": "الإشعارات",
+    "EMPTY": "لا توجد إشعارات",
+    "MARK_ALL_READ": "تعيين الكل كمقروء"
+  },
+  "ERRORS": {
+    "GENERAL": "حدث خطأ",
+    "NETWORK": "خطأ في الاتصال، يرجى التحقق من اتصالك",
+    "NOT_FOUND": "غير موجود",
+    "UNAUTHORIZED": "وصول غير مصرح به",
+    "VALIDATION": "يرجى التحقق من المدخلات والمحاولة مرة أخرى"
+  },
+  "BUTTONS": {
+    "OK": "موافق",
+    "CANCEL": "إلغاء",
+    "SAVE": "حفظ",
+    "CONFIRM": "تأكيد",
+    "DELETE": "حذف",
+    "APPLY": "تطبيق",
+    "CLOSE": "إغلاق",
+    "BACK": "رجوع",
+    "NEXT": "التالي"
+  },
+  "COMMON": {
+    "LOADING": "جاري التحميل...",
+    "CURRENCY": "ر.س",
+    "YES": "نعم",
+    "NO": "لا",
+    "SEARCH": "بحث",
+    "FILTER": "تصفية",
+    "SORT": "ترتيب",
+    "DATE": "التاريخ",
+    "STATUS": "الحالة",
+    "DETAILS": "التفاصيل"
+  }
+}

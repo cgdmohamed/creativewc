@@ -1,0 +1,212 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <img src="assets/images/logo.svg" class="branding" alt="DARZN Logo" height="28">
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="showSearchPrompt()">
+        <ion-icon slot="icon-only" name="search-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="navigateToNotifications()" class="pulse-badge" [class.active-pulse]="unreadNotificationCount > 0">
+        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+        <span *ngIf="unreadNotificationCount > 0" class="notification-badge"></span>
+      </ion-button>
+      <ion-button routerLink="/wishlist">
+        <ion-icon slot="icon-only" name="heart-outline"></ion-icon>
+      </ion-button>
+      <ion-button routerLink="/cart" class="pulse-badge" [class.active-pulse]="cartItemCount > 0">
+        <ion-icon slot="icon-only" name="bag-outline"></ion-icon>
+        <span *ngIf="cartItemCount > 0" class="notification-badge"></span>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding-horizontal">
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" class="custom-refresher">
+    <ion-refresher-content
+      pullingIcon="arrow-down-outline"
+      pullingText="اسحب للتحديث"
+      refreshingSpinner="circles"
+      refreshingText="جاري التحديث...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Main content with skeleton loading when isLoading -->
+  <div>
+    <!-- Hero banner with skeleton loading -->
+    <div *ngIf="isLoading">
+      <app-skeleton type="banner" count="1"></app-skeleton>
+    </div>
+    <swiper-container *ngIf="!isLoading" class="banner-slides" 
+                      pagination="true" 
+                      autoplay-delay="3000"
+                      autoplay-disable-on-interaction="false">
+      <swiper-slide>
+        <img src="assets/images/banner1.jpg" alt="Banner 1">
+      </swiper-slide>
+      <swiper-slide>
+        <img src="assets/images/banner2.jpg" alt="Banner 2">
+      </swiper-slide>
+      <swiper-slide>
+        <img src="assets/images/banner3.jpg" alt="Banner 3">
+      </swiper-slide>
+    </swiper-container>
+
+    <!-- Categories -->
+    <div class="section-header">
+      <h2>التصنيفات</h2>
+      <ion-button fill="clear" size="small" routerLink="/categories">عرض الكل</ion-button>
+    </div>
+    
+    <!-- Category Skeleton Loading -->
+    <div *ngIf="isLoading">
+      <app-skeleton type="category" count="8"></app-skeleton>
+    </div>
+    
+    <!-- Two row category grid with swiper -->
+    <div *ngIf="!isLoading" class="category-grid-container">
+      <!-- Simple grid implementation for now -->
+      <div class="category-grid">
+        <div class="category-item" *ngFor="let category of categories | slice:0:8" [routerLink]="['/category', category.id]">
+          <div class="category-image">
+            <img [src]="getProductImageUrl(category.image)" [alt]="category.name" (error)="handleImageError($event)">
+          </div>
+          <h3>{{ category.name }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personalized Recommendations -->
+    <app-recommendation-carousel 
+      *ngIf="!isLoading"
+      title="منتجات مقترحة لك"
+      description="مبنية على تفضيلاتك السابقة"
+      [maxItems]="8">
+    </app-recommendation-carousel>
+
+    <!-- Featured products -->
+    <div class="section-header">
+      <h2>منتجات مميزة</h2>
+      <ion-button fill="clear" size="small" routerLink="/products/featured">عرض الكل</ion-button>
+    </div>
+    
+    <!-- Product Card Skeleton Loading -->
+    <div *ngIf="isLoading">
+      <app-skeleton type="card" count="2"></app-skeleton>
+    </div>
+    
+    <!-- Grid layout for products -->
+    <div class="products-grid" *ngIf="!isLoading">
+      <div class="product-card" *ngFor="let product of featuredProducts">
+        <!-- Product card content -->
+        <div class="product-image" [routerLink]="['/product', product.id]">
+          <img [src]="getProductImageUrl(product)" [alt]="product.name" class="product-img" (error)="handleImageError($event)">
+          <div class="product-badge" *ngIf="product.on_sale">تخفيض</div>
+        </div>
+        
+        <div class="product-details">
+          <h3 class="product-name" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
+          
+          <div class="product-price">
+            <span class="current-price">{{ product.on_sale ? product.sale_price : product.regular_price }} ر.س</span>
+            <span class="original-price" *ngIf="product.on_sale">{{ product.regular_price }} ر.س</span>
+          </div>
+          
+          <div class="product-actions">
+            <ion-button fill="clear" (click)="onFavoriteChange(product.id)">
+              <ion-icon [name]="isProductInWishlist(product.id) ? 'heart' : 'heart-outline'"></ion-icon>
+            </ion-button>
+            
+            <ion-button expand="block" (click)="addToCart(product)">
+              إضافة للسلة
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New arrivals -->
+    <div class="section-header">
+      <h2>وصل حديثاً</h2>
+      <ion-button fill="clear" size="small" routerLink="/products/new">عرض الكل</ion-button>
+    </div>
+    
+    <!-- Product Card Skeleton Loading -->
+    <div *ngIf="isLoading">
+      <app-skeleton type="card" count="2"></app-skeleton>
+    </div>
+    
+    <!-- Grid layout for products -->
+    <div class="products-grid" *ngIf="!isLoading">
+      <div class="product-card" *ngFor="let product of newProducts">
+        <!-- Product card content -->
+        <div class="product-image" [routerLink]="['/product', product.id]">
+          <img [src]="getProductImageUrl(product)" [alt]="product.name" class="product-img" (error)="handleImageError($event)">
+          <div class="product-badge" *ngIf="product.on_sale">تخفيض</div>
+        </div>
+        
+        <div class="product-details">
+          <h3 class="product-name" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
+          
+          <div class="product-price">
+            <span class="current-price">{{ product.on_sale ? product.sale_price : product.regular_price }} ر.س</span>
+            <span class="original-price" *ngIf="product.on_sale">{{ product.regular_price }} ر.س</span>
+          </div>
+          
+          <div class="product-actions">
+            <ion-button fill="clear" (click)="onFavoriteChange(product.id)">
+              <ion-icon [name]="isProductInWishlist(product.id) ? 'heart' : 'heart-outline'"></ion-icon>
+            </ion-button>
+            
+            <ion-button expand="block" (click)="addToCart(product)">
+              إضافة للسلة
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- On sale products -->
+    <div class="section-header">
+      <h2>عروض</h2>
+      <ion-button fill="clear" size="small" routerLink="/products/sale">عرض الكل</ion-button>
+    </div>
+    
+    <!-- Product Card Skeleton Loading -->
+    <div *ngIf="isLoading">
+      <app-skeleton type="card" count="2"></app-skeleton>
+    </div>
+    
+    <!-- Grid layout for products -->
+    <div class="products-grid" *ngIf="!isLoading">
+      <div class="product-card" *ngFor="let product of onSaleProducts">
+        <!-- Product card content -->
+        <div class="product-image" [routerLink]="['/product', product.id]">
+          <img [src]="getProductImageUrl(product)" [alt]="product.name" class="product-img" (error)="handleImageError($event)">
+          <div class="product-badge">تخفيض</div>
+        </div>
+        
+        <div class="product-details">
+          <h3 class="product-name" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
+          
+          <div class="product-price">
+            <span class="current-price">{{ product.sale_price }} ر.س</span>
+            <span class="original-price">{{ product.regular_price }} ر.س</span>
+          </div>
+          
+          <div class="product-actions">
+            <ion-button fill="clear" (click)="onFavoriteChange(product.id)">
+              <ion-icon [name]="isProductInWishlist(product.id) ? 'heart' : 'heart-outline'"></ion-icon>
+            </ion-button>
+            
+            <ion-button expand="block" (click)="addToCart(product)">
+              إضافة للسلة
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

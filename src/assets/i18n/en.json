@@ -1,0 +1,139 @@
+{
+  "APP": {
+    "TITLE": "DRZN Shopping",
+    "SLOGAN": "Shop smarter, not harder",
+    "LOADING": "Loading..."
+  },
+  "HOME": {
+    "WELCOME": "Welcome to DRZN Shopping",
+    "FEATURED_PRODUCTS": "Featured Products",
+    "NEW_ARRIVALS": "New Arrivals",
+    "ON_SALE": "On Sale",
+    "VIEW_ALL": "View All"
+  },
+  "PRODUCT": {
+    "ADD_TO_CART": "Add to Cart",
+    "ADD_TO_WISHLIST": "Add to Wishlist",
+    "REMOVE_FROM_WISHLIST": "Remove from Wishlist",
+    "OUT_OF_STOCK": "Out of Stock",
+    "QUANTITY": "Quantity",
+    "DESCRIPTION": "Description",
+    "SPECIFICATIONS": "Specifications",
+    "REVIEWS": "Reviews",
+    "RELATED_PRODUCTS": "Related Products"
+  },
+  "CART": {
+    "TITLE": "Shopping Cart",
+    "EMPTY": "Your cart is empty",
+    "CONTINUE_SHOPPING": "Continue Shopping",
+    "PROCEED_TO_CHECKOUT": "Proceed to Checkout",
+    "SUBTOTAL": "Subtotal",
+    "TAX": "Tax",
+    "SHIPPING": "Shipping",
+    "TOTAL": "Total",
+    "REMOVE": "Remove",
+    "UPDATE": "Update"
+  },
+  "CHECKOUT": {
+    "TITLE": "Checkout",
+    "SHIPPING_ADDRESS": "Shipping Address",
+    "BILLING_ADDRESS": "Billing Address",
+    "PAYMENT_METHOD": "Payment Method",
+    "REVIEW_ORDER": "Review Order",
+    "PLACE_ORDER": "Place Order",
+    "SAME_AS_SHIPPING": "Same as shipping address"
+  },
+  "ACCOUNT": {
+    "TITLE": "My Account",
+    "PROFILE": "Profile",
+    "ORDERS": "Orders",
+    "ADDRESSES": "Addresses",
+    "WISHLIST": "Wishlist",
+    "SETTINGS": "Settings",
+    "LOGOUT": "Logout"
+  },
+  "SETTINGS": {
+    "TITLE": "Settings",
+    "APP_SETTINGS": "App Settings",
+    "LANGUAGE": "Language",
+    "LANGUAGE_DESC": "Choose your preferred language",
+    "SELECT_LANGUAGE": "Select Language",
+    "USER_INFO": "User Information",
+    "DEFAULT_USER": "User",
+    "NO_EMAIL": "No email address",
+    "NOTIFICATIONS": "App Notifications",
+    "NOTIFICATIONS_DESC": "Control notification settings in the app",
+    "ENABLE_NOTIFICATIONS": "Enable Notifications",
+    "ORDER_NOTIFICATIONS": "Order Notifications",
+    "PROMOTION_NOTIFICATIONS": "Promotion Notifications",
+    "REFRESH_TOKEN": "Refresh Notification Token",
+    "DEVICE_ID": "Device ID",
+    "GENERAL_SETTINGS": "General Settings",
+    "THEME": "Theme",
+    "DARK_MODE": "Dark Mode",
+    "DATA_SAVING": "Data Saving",
+    "APP_INFO": "App Information",
+    "APP_VERSION": "App Version",
+    "ABOUT": "About",
+    "VERSION": "Version",
+    "LOGOUT": "Logout"
+  },
+  "AUTH": {
+    "LOGIN": "Login",
+    "REGISTER": "Register",
+    "FORGOT_PASSWORD": "Forgot Password?",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "CONFIRM_PASSWORD": "Confirm Password",
+    "REMEMBER_ME": "Remember Me",
+    "DONT_HAVE_ACCOUNT": "Don't have an account?",
+    "ALREADY_HAVE_ACCOUNT": "Already have an account?",
+    "RESET_PASSWORD": "Reset Password",
+    "PHONE_NUMBER": "Phone Number",
+    "VERIFY_CODE": "Verify Code",
+    "SEND_CODE": "Send Code"
+  },
+  "NAVIGATION": {
+    "HOME": "Home",
+    "SHOP": "Shop",
+    "CATEGORIES": "Categories",
+    "CART": "Cart",
+    "ACCOUNT": "Account",
+    "SEARCH": "Search"
+  },
+  "NOTIFICATIONS": {
+    "TITLE": "Notifications",
+    "EMPTY": "No notifications",
+    "MARK_ALL_READ": "Mark all as read"
+  },
+  "ERRORS": {
+    "GENERAL": "An error occurred",
+    "NETWORK": "Network error, please check your connection",
+    "NOT_FOUND": "Not found",
+    "UNAUTHORIZED": "Unauthorized access",
+    "VALIDATION": "Please check your input and try again"
+  },
+  "BUTTONS": {
+    "OK": "OK",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "CONFIRM": "Confirm",
+    "DELETE": "Delete",
+    "APPLY": "Apply",
+    "CLOSE": "Close",
+    "BACK": "Back",
+    "NEXT": "Next"
+  },
+  "COMMON": {
+    "LOADING": "Loading...",
+    "CURRENCY": "USD",
+    "YES": "Yes",
+    "NO": "No",
+    "SEARCH": "Search",
+    "FILTER": "Filter",
+    "SORT": "Sort",
+    "DATE": "Date",
+    "STATUS": "Status",
+    "DETAILS": "Details"
+  }
+}

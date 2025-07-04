@@ -1,0 +1,253 @@
+/**
+ * RTL (Right-to-Left) specific styles
+ * These styles improve the user experience for RTL languages like Arabic
+ */
+
+/* Core RTL adjustments */
+[dir="rtl"] {
+  /* Content text alignment */
+  text-align: right;
+  
+  /* List items RTL fixes */
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 0;
+    --inner-padding-start: 8px;
+    
+    &::part(native) {
+      flex-direction: row-reverse;
+    }
+    
+    ion-label {
+      margin-left: 0;
+      margin-right: 16px;
+    }
+  }
+  
+  /* Fix item sliding directions */
+  ion-item-sliding ion-item-options {
+    &[side="start"] {
+      right: 100%;
+      left: auto;
+    }
+    
+    &[side="end"] {
+      left: 100%;
+      right: auto;
+    }
+  }
+  
+  /* Input text fixes */
+  ion-input, ion-textarea, ion-searchbar {
+    text-align: right;
+    
+    &.rtl-input-fix {
+      input, textarea {
+        direction: rtl;
+        text-align: right;
+      }
+    }
+  }
+
+  /* Button icons fixes */
+  ion-button ion-icon:first-child:not(:only-child) {
+    margin-right: 0;
+    margin-left: 0.3em;
+  }
+  
+  /* Back button fixes */
+  ion-back-button {
+    transform: scaleX(-1);
+  }
+  
+  /* Toast position fixes */
+  ion-toast {
+    &.toast-top {
+      transform-origin: right top;
+    }
+    
+    &.toast-middle {
+      transform-origin: center right;
+    }
+    
+    &.toast-bottom {
+      transform-origin: right bottom;
+    }
+  }
+  
+  /* Menu side adjustments */
+  ion-menu[side="start"] {
+    --side: right;
+  }
+  
+  ion-menu[side="end"] {
+    --side: left;
+  }
+  
+  /* Fix for ion-segment buttons */
+  ion-segment-button {
+    flex-direction: row-reverse;
+  }
+  
+  /* Alert adjustments */
+  ion-alert {
+    .alert-head, .alert-message, .alert-input-group, .alert-radio-group {
+      text-align: right;
+    }
+    
+    .alert-radio-label {
+      text-align: right;
+      padding-right: 52px;
+      padding-left: 26px;
+    }
+    
+    .alert-checkbox-label {
+      text-align: right;
+      padding-right: 52px;
+      padding-left: 26px;
+    }
+    
+    .alert-tappable {
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+    }
+  }
+  
+  /* Modal adjustments */
+  ion-modal ion-toolbar {
+    ion-title {
+      padding-right: 56px;
+      padding-left: 56px;
+    }
+  }
+  
+  /* Date/time picker adjustments */
+  ion-datetime {
+    direction: rtl;
+  }
+  
+  /* Progress bar animation direction */
+  ion-progress-bar {
+    --buffer-background: linear-gradient(to right, var(--ion-color-primary-tint, #3880ff) 0%, var(--ion-color-primary-tint, #3880ff) 30%, transparent 30%);
+  }
+  
+  /* Item details fixes */
+  ion-item-divider {
+    justify-content: flex-start;
+  }
+  
+  /* Card alignment */
+  ion-card-header {
+    text-align: right;
+  }
+  
+  /* Fix fab buttons */
+  ion-fab[horizontal="start"] {
+    left: unset;
+    right: 0;
+  }
+  
+  ion-fab[horizontal="end"] {
+    right: unset;
+    left: 0;
+  }
+  
+  /* Checkbox position */
+  ion-checkbox {
+    margin-right: 0;
+    margin-left: 16px;
+  }
+  
+  /* Range slider adaptations */
+  ion-range {
+    .range-knob-handle {
+      transform: scaleX(-1);
+    }
+  }
+  
+  /* List header */
+  ion-list-header {
+    text-align: right;
+  }
+
+  /* Fix infinite scroll spinner placement */
+  ion-infinite-scroll {
+    flex-direction: row-reverse;
+  }
+}
+
+/* Adapt Swiper to RTL mode */
+.swiper-container-rtl {
+  .swiper-button-prev {
+    right: 10px;
+    left: auto;
+    transform: rotate(180deg);
+  }
+  
+  .swiper-button-next {
+    left: 10px;
+    right: auto;
+    transform: rotate(180deg);
+  }
+  
+  .swiper-pagination-progressbar .swiper-pagination-progressbar-fill {
+    transform-origin: right top;
+  }
+  
+  .swiper-container-3d .swiper-slide-shadow-left {
+    background-image: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  }
+  
+  .swiper-container-3d .swiper-slide-shadow-right {
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  }
+}
+
+/* Custom modal animations for RTL */
+.rtl-modal-enter {
+  transform: translateX(-100%);
+}
+
+.rtl-modal-leave {
+  transform: translateX(100%);
+}
+
+/* Custom loading indicator adjustments */
+[dir="rtl"] .loading-wrapper {
+  text-align: right;
+}
+
+/* Custom action sheet adjustments for RTL */
+[dir="rtl"] {
+  ion-action-sheet .action-sheet-group .action-sheet-button {
+    text-align: right;
+    
+    ion-icon {
+      margin-right: 0;
+      margin-left: 1rem;
+    }
+  }
+}
+
+/* Popover adjustments for RTL */
+[dir="rtl"] ion-popover {
+  .popover-content {
+    text-align: right;
+  }
+  
+  ion-item {
+    --inner-padding-start: 0;
+    --inner-padding-end: 16px;
+    
+    ion-label {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+}
+
+/* Fix grid directions */
+[dir="rtl"] ion-grid ion-row {
+  flex-direction: row;
+}

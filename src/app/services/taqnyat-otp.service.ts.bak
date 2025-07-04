@@ -1,0 +1,515 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of, throwError, from, TimeoutError } from 'rxjs';
+import { catchError, map, switchMap, timeout } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { Storage } from '@ionic/storage-angular';
+import { EnvironmentService } from './environment.service';
+
+export interface WordPressOtpResponse {
+  status: 'success' | 'error';
+  message: string;
+  requestId?: string;
+  code?: number;
+  data?: any;
+}
+
+export interface WordPressOtpRequest {
+  phone: string;
+  code?: string;
+  requestId?: string;
+  lang?: string;
+  note?: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TaqnyatOtpService {
+  // WordPress proxy endpoints
+  private wpSendOtpUrl = environment.wordpressUrl + '/wp-json/taqnyat/v1/send-otp';
+  private wpVerifyOtpUrl = environment.wordpressUrl + '/wp-json/taqnyat/v1/verify-otp';
+  
+  private readonly OTP_STORAGE_KEY = 'taqnyat_otp_data';
+  private readonly OTP_EXPIRATION_MINUTES = 10;
+
+  constructor(
+    private http: HttpClient,
+    private storage: Storage,
+    private environmentService: EnvironmentService
+  ) {}
+
+  /**
+   * Send OTP to the provided phone number 
+   * Uses WordPress proxy API
+   * 
+   * @param phoneNumber The phone number to send the OTP to
+   */
+  sendOtp(phoneNumber: string): Observable<WordPressOtpResponse> {
+    // Format the phone number (ensure it's in local format for WordPress API)
+    const formattedNumber = this.formatPhoneNumber(phoneNumber);
+    console.log('Formatted phone number for OTP:', formattedNumber);
+    
+    // Prepare WordPress proxy request
+    const proxyRequest: WordPressOtpRequest = {
+      phone: formattedNumber,
+      lang: 'ar',
+      note: 'DRZN'
+    };
+    
+    console.log('Sending OTP request to WordPress proxy:', proxyRequest);
+    
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+    
+    // Call the WordPress proxy endpoint
+    return this.http.post<any>(this.wpSendOtpUrl, proxyRequest, { 
+      headers,
+      responseType: 'json'
+    }).pipe(
+      timeout(15000), // 15 second timeout for sending OTP
+      map(response => {
+        console.log('WordPress proxy OTP response:', response);
+        
+        // Format response to match our expected interface
+        let formattedResponse: WordPressOtpResponse;
+        
+        if (response && response.status === 'success') {
+          // Store the verification requestId if successful and not empty
+          if (response.requestId && response.requestId.trim() !== '') {
+            console.log('Storing requestId for verification:', response.requestId);
+            this.storeVerificationData(formattedNumber, response.requestId);
+          } else {
+            console.log('No requestId received from API, will use phone number for verification');
+            // Store phone number as identifier for verification
+            this.storeVerificationData(formattedNumber, formattedNumber);
+          }
+          
+          formattedResponse = {
+            status: 'success',
+            message: response.message || 'تم ارسال رمز التحقق بنجاح',
+            requestId: response.requestId
+          };
+        } else {
+          // Error response
+          formattedResponse = {
+            status: 'error',
+            message: response?.message || 'فشل في إرسال رمز التحقق',
+            code: response?.code || 0
+          };
+        }
+        
+        return formattedResponse;
+      }),
+      catchError(error => {
+        console.error('Error sending OTP via WordPress proxy:', error);
+        
+        // Specific handling for timeout errors
+        if (error instanceof TimeoutError) {
+          console.error('OTP sending request timed out');
+          
+          const timeoutResponse: WordPressOtpResponse = {
+            status: 'error',
+            message: 'انتهت مهلة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.',
+            code: 408 // Timeout status code
+          };
+          
+          if (!environment.production) {
+            // In development, provide additional information and fallback
+            console.log('Timeout occurred during OTP sending. Using fallback...');
+            const verificationCode = this.generateOtpCode();
+            this.storeOtpData(formattedNumber, verificationCode);
+            
+            console.log(`Timeout Fallback: OTP ${verificationCode} would be sent to ${formattedNumber}`);
+            
+            const fallbackResponse: WordPressOtpResponse = {
+              status: 'success',
+              message: 'تم إرسال رمز التحقق (وضع التطوير - بعد انتهاء المهلة)',
+              requestId: Math.random().toString(36).substring(2, 15)
+            };
+            
+            return of(fallbackResponse);
+          }
+          
+          return of(timeoutResponse);
+        }
+        
+        // Handle other errors
+        if (environment.production) {
+          return throwError(() => new Error('فشل في إرسال رمز التحقق. يرجى المحاولة مرة أخرى.'));
+        } else {
+          // In development, fall back to demo mode if API fails
+          const verificationCode = this.generateOtpCode();
+          this.storeOtpData(formattedNumber, verificationCode);
+          
+          console.log(`API Failed, Demo Fallback: OTP ${verificationCode} would be sent to ${formattedNumber}`);
+          
+          const fallbackResponse: WordPressOtpResponse = {
+            status: 'success',
+            message: 'تم إرسال رمز التحقق (وضع التطوير)',
+            requestId: Math.random().toString(36).substring(2, 15)
+          };
+          
+          return of(fallbackResponse);
+        }
+      })
+    );
+  }
+
+  /**
+   * Verify the OTP entered by the user
+   * Uses WordPress proxy API
+   * 
+   * @param phoneNumber The phone number the OTP was sent to
+   * @param otpCode The OTP code entered by the user
+   */
+  verifyOtp(phoneNumber: string, otpCode: string): Observable<WordPressOtpResponse> {
+    // Format the phone number
+    const formattedNumber = this.formatPhoneNumber(phoneNumber);
+    
+    // Create a new Observable to handle the verification process
+    return new Observable<WordPressOtpResponse>(observer => {
+      // Get stored requestId asynchronously
+      this.getStoredRequestId(formattedNumber).then(requestId => {
+        // Prepare WordPress proxy request for verification
+        const proxyRequest: WordPressOtpRequest = {
+          phone: formattedNumber,
+          code: otpCode
+        };
+        
+        // Add requestId if available and valid
+        if (requestId && requestId !== formattedNumber) {
+          console.log('Using stored requestId for verification:', requestId);
+          proxyRequest.requestId = requestId;
+        } else {
+          console.log('No valid requestId found for verification, proceeding without it');
+        }
+        
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        });
+        
+        console.log('Sending verification request to WordPress proxy:', proxyRequest);
+        
+        // Call WordPress proxy endpoint
+        this.http.post<any>(this.wpVerifyOtpUrl, proxyRequest, { 
+          headers, 
+          responseType: 'json'
+        }).pipe(
+          timeout(10000) // 10 second timeout
+        ).subscribe({
+          next: (response) => {
+            console.log('WordPress proxy verification response:', response);
+            
+            // Handle different possible response formats
+            let formattedResponse: WordPressOtpResponse;
+            
+            // Check for success - can be in different formats depending on the API response
+            if (
+              // Check standard success response
+              (response && response.status === 'success') ||
+              // Check code 10 success response from Taqnyat API
+              (response && response.code === 10) ||
+              // Check code 10 in nested data
+              (response && response.data && response.data.code === 10)
+            ) {
+              formattedResponse = {
+                status: 'success',
+                message: response.message || 'تم التحقق بنجاح'
+              };
+              
+              // Clear stored verification data on success
+              this.clearStoredOtpData(formattedNumber);
+            } else {
+              // Handle error cases
+              const errorMessage = response?.message || 
+                                 (response?.data?.message) || 
+                                 'رمز التحقق غير صحيح';
+              
+              formattedResponse = {
+                status: 'error',
+                message: errorMessage,
+                code: response?.code || (response?.data?.code) || 0
+              };
+            }
+            
+            observer.next(formattedResponse);
+            observer.complete();
+          },
+          error: (error) => {
+            console.error('Error verifying OTP via WordPress proxy:', error);
+            const statusCode = error.status;
+            
+            // Log additional details for HTTP errors
+            if (statusCode) {
+              console.error(`HTTP Error ${statusCode}:`, error.statusText);
+              if (error.error) {
+                console.error('Error response body:', error.error);
+              }
+            }
+            
+            // Handle various error scenarios
+            if (error instanceof TimeoutError) {
+              console.error('OTP verification request timed out');
+              
+              // For development mode, try local verification as fallback
+              if (!environment.production) {
+                this.verifyLocalOtp(formattedNumber, otpCode).then(isValid => {
+                  if (isValid) {
+                    observer.next({
+                      status: 'success',
+                      message: 'تم التحقق بنجاح (وضع التطوير - استجابة بعد انتهاء المهلة)'
+                    });
+                  } else {
+                    observer.next({
+                      status: 'error',
+                      message: 'انتهت مهلة التحقق من الرمز. يرجى المحاولة مرة أخرى.',
+                      code: 408
+                    });
+                  }
+                  observer.complete();
+                }).catch(() => {
+                  // If local verification fails
+                  observer.next({
+                    status: 'error',
+                    message: 'انتهت مهلة التحقق من الرمز. يرجى المحاولة مرة أخرى.',
+                    code: 408
+                  });
+                  observer.complete();
+                });
+              } else {
+                // Production mode - just return timeout error
+                observer.next({
+                  status: 'error',
+                  message: 'انتهت مهلة التحقق من الرمز. يرجى المحاولة مرة أخرى.',
+                  code: 408
+                });
+                observer.complete();
+              }
+            } 
+            // Handle HTTP 500 errors
+            else if (statusCode === 500) {
+              if (!environment.production) {
+                // For development, try local verification
+                this.verifyLocalOtp(formattedNumber, otpCode).then(isValid => {
+                  if (isValid) {
+                    observer.next({
+                      status: 'success',
+                      message: 'تم التحقق بنجاح (تجاوز خطأ الخادم)'
+                    });
+                  } else {
+                    observer.next({
+                      status: 'error',
+                      message: 'خطأ في الخادم أثناء التحقق من الرمز، يرجى المحاولة مرة أخرى',
+                      code: 500
+                    });
+                  }
+                  observer.complete();
+                }).catch(() => {
+                  observer.next({
+                    status: 'error',
+                    message: 'خطأ في الخادم أثناء التحقق من الرمز، يرجى المحاولة مرة أخرى',
+                    code: 500
+                  });
+                  observer.complete();
+                });
+              } else {
+                // Production mode
+                observer.next({
+                  status: 'error',
+                  message: 'خطأ في الخادم أثناء التحقق من الرمز، يرجى المحاولة مرة أخرى',
+                  code: 500
+                });
+                observer.complete();
+              }
+            }
+            // All other errors
+            else {
+              if (!environment.production) {
+                // For development, try local verification
+                this.verifyLocalOtp(formattedNumber, otpCode).then(isValid => {
+                  if (isValid) {
+                    observer.next({
+                      status: 'success',
+                      message: 'تم التحقق بنجاح (وضع التطوير)'
+                    });
+                  } else {
+                    observer.next({
+                      status: 'error',
+                      message: 'فشل في التحقق من الرمز. يرجى المحاولة مرة أخرى.',
+                      code: statusCode || 0
+                    });
+                  }
+                  observer.complete();
+                }).catch(() => {
+                  observer.next({
+                    status: 'error',
+                    message: 'فشل في التحقق من الرمز. يرجى المحاولة مرة أخرى.',
+                    code: statusCode || 0
+                  });
+                  observer.complete();
+                });
+              } else {
+                // Production mode
+                observer.next({
+                  status: 'error',
+                  message: 'فشل في التحقق من الرمز. يرجى المحاولة مرة أخرى.',
+                  code: statusCode || 0
+                });
+                observer.complete();
+              }
+            }
+          }
+        });
+      }).catch(error => {
+        // Handle error getting stored requestId
+        console.error('Error getting stored requestId:', error);
+        observer.next({
+          status: 'error',
+          message: 'حدث خطأ أثناء التحقق من الرمز. يرجى المحاولة مرة أخرى.',
+          code: 0
+        });
+        observer.complete();
+      });
+    });
+  }
+
+  /**
+   * Generate a random 4-digit OTP code for demo/development mode
+   */
+  private generateOtpCode(): string {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+  }
+  
+  /**
+   * Store OTP data for local verification (used in demo/development mode)
+   */
+  private async storeOtpData(phoneNumber: string, code: string): Promise<void> {
+    // Calculate expiration time (10 minutes from now)
+    const expirationTime = new Date();
+    expirationTime.setMinutes(expirationTime.getMinutes() + this.OTP_EXPIRATION_MINUTES);
+    
+    const otpData = {
+      phoneNumber,
+      code,
+      expirationTime: expirationTime.toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    // Get existing data
+    const existingData = await this.storage.get(this.OTP_STORAGE_KEY) || {};
+    
+    // Update with new data for this phone number
+    existingData[phoneNumber] = otpData;
+    
+    await this.storage.set(this.OTP_STORAGE_KEY, existingData);
+  }
+  
+  /**
+   * Store verification data for WordPress API (requestId, etc.)
+   */
+  private async storeVerificationData(phoneNumber: string, requestId: string): Promise<void> {
+    // Get existing data
+    const existingData = await this.storage.get(this.OTP_STORAGE_KEY) || {};
+    
+    // Update with verification data
+    existingData[phoneNumber] = {
+      phoneNumber,
+      requestId,
+      createdAt: new Date().toISOString()
+    };
+    
+    await this.storage.set(this.OTP_STORAGE_KEY, existingData);
+  }
+  
+  /**
+   * Verify OTP locally (used in demo/development mode)
+   */
+  private async verifyLocalOtp(phoneNumber: string, code: string): Promise<boolean> {
+    // Get stored OTP data
+    const allOtpData = await this.storage.get(this.OTP_STORAGE_KEY) || {};
+    const otpData = allOtpData[phoneNumber];
+    
+    if (!otpData) {
+      console.error('No OTP data found for phone number:', phoneNumber);
+      return false;
+    }
+    
+    // Check if we have the code (demo mode) or just requestId (real API mode)
+    if (!otpData.code) {
+      console.log('No code found in OTP data, using WordPress API verification only');
+      // In API mode, we'll just let the API handle verification
+      return false;
+    }
+    
+    const now = new Date();
+    const expirationTime = otpData.expirationTime ? new Date(otpData.expirationTime) : null;
+    
+    // Check if OTP has expired
+    if (expirationTime && now > expirationTime) {
+      console.error('OTP expired');
+      this.clearStoredOtpData(phoneNumber);
+      return false;
+    }
+    
+    // Verify the code
+    const isValid = code === otpData.code;
+    
+    console.log(`Verifying OTP: Entered=${code}, Stored=${otpData.code}, Valid=${isValid}`);
+    
+    // If valid, clear the stored OTP data
+    if (isValid) {
+      this.clearStoredOtpData(phoneNumber);
+    }
+    
+    return isValid;
+  }
+  
+  /**
+   * Get stored request ID for a phone number
+   */
+  private async getStoredRequestId(phoneNumber: string): Promise<string | null> {
+    const allOtpData = await this.storage.get(this.OTP_STORAGE_KEY) || {};
+    const otpData = allOtpData[phoneNumber];
+    
+    return otpData && otpData.requestId ? otpData.requestId : null;
+  }
+  
+  /**
+   * Clear stored OTP data for a phone number
+   */
+  private async clearStoredOtpData(phoneNumber: string): Promise<void> {
+    const allOtpData = await this.storage.get(this.OTP_STORAGE_KEY) || {};
+    
+    if (allOtpData[phoneNumber]) {
+      delete allOtpData[phoneNumber];
+      await this.storage.set(this.OTP_STORAGE_KEY, allOtpData);
+    }
+  }
+
+  /**
+   * Format phone number for WordPress API
+   * The API expects format with country code (e.g., 966551234567)
+   * @param phone The phone number to format
+   */
+  private formatPhoneNumber(phone: string): string {
+    // Remove any non-digit characters
+    let digits = phone.replace(/\D/g, '');
+    
+    // If already has country code, leave it
+    if (digits.startsWith('966')) {
+      return digits;
+    }
+    
+    // Remove leading zero if present
+    if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    
+    // Add Saudi country code
+    return '966' + digits;
+  }
+}

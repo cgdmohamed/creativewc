@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2732" height="2732" viewBox="0 0 2732 2732" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="2732" height="2732" fill="#ec1c24"/>
+  
+  <!-- Logo - Shopping Bag Icon -->
+  <g transform="translate(1366, 1200) scale(25)">
+    <!-- Shopping bag outline -->
+    <path d="M-40 -20 L40 -20 L50 15 L-50 15 Z" fill="white" stroke="white" stroke-width="2"/>
+    <!-- Bag handles -->
+    <path d="M-35 -50 L-25 -20 M25 -20 L35 -50" stroke="white" stroke-width="10" stroke-linecap="round"/>
+    <!-- Bag detail -->
+    <path d="M-30 -10 L30 -10 L35 5 L-35 5 Z" fill="#ec1c24"/>
+  </g>
+  
+  <!-- App Name in Arabic -->
+  <text x="1366" y="1800" fill="white" font-family="Alexandria, Arial, sans-serif" font-size="240" text-anchor="middle" font-weight="bold">درزن</text>
+</svg>

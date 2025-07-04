@@ -1,0 +1,139 @@
+{
+  "APP": {
+    "TITLE": "DRZN Shopping",
+    "SLOGAN": "Achetez plus intelligemment, pas plus difficilement",
+    "LOADING": "Chargement..."
+  },
+  "HOME": {
+    "WELCOME": "Bienvenue chez DRZN Shopping",
+    "FEATURED_PRODUCTS": "Produits en Vedette",
+    "NEW_ARRIVALS": "Nouveautés",
+    "ON_SALE": "En Solde",
+    "VIEW_ALL": "Voir Tout"
+  },
+  "PRODUCT": {
+    "ADD_TO_CART": "Ajouter au Panier",
+    "ADD_TO_WISHLIST": "Ajouter à la Liste de Souhaits",
+    "REMOVE_FROM_WISHLIST": "Retirer de la Liste de Souhaits",
+    "OUT_OF_STOCK": "Rupture de Stock",
+    "QUANTITY": "Quantité",
+    "DESCRIPTION": "Description",
+    "SPECIFICATIONS": "Spécifications",
+    "REVIEWS": "Avis",
+    "RELATED_PRODUCTS": "Produits Connexes"
+  },
+  "CART": {
+    "TITLE": "Panier d'Achat",
+    "EMPTY": "Votre panier est vide",
+    "CONTINUE_SHOPPING": "Continuer les Achats",
+    "PROCEED_TO_CHECKOUT": "Procéder au Paiement",
+    "SUBTOTAL": "Sous-total",
+    "TAX": "Taxe",
+    "SHIPPING": "Livraison",
+    "TOTAL": "Total",
+    "REMOVE": "Supprimer",
+    "UPDATE": "Mettre à Jour"
+  },
+  "CHECKOUT": {
+    "TITLE": "Commande",
+    "SHIPPING_ADDRESS": "Adresse de Livraison",
+    "BILLING_ADDRESS": "Adresse de Facturation",
+    "PAYMENT_METHOD": "Méthode de Paiement",
+    "REVIEW_ORDER": "Réviser la Commande",
+    "PLACE_ORDER": "Passer la Commande",
+    "SAME_AS_SHIPPING": "Identique à l'adresse de livraison"
+  },
+  "ACCOUNT": {
+    "TITLE": "Mon Compte",
+    "PROFILE": "Profil",
+    "ORDERS": "Commandes",
+    "ADDRESSES": "Adresses",
+    "WISHLIST": "Liste de Souhaits",
+    "SETTINGS": "Paramètres",
+    "LOGOUT": "Déconnexion"
+  },
+  "SETTINGS": {
+    "TITLE": "Paramètres",
+    "APP_SETTINGS": "Paramètres de l'Application",
+    "LANGUAGE": "Langue",
+    "LANGUAGE_DESC": "Choisissez votre langue préférée",
+    "SELECT_LANGUAGE": "Sélectionner la Langue",
+    "USER_INFO": "Informations Utilisateur",
+    "DEFAULT_USER": "Utilisateur",
+    "NO_EMAIL": "Aucune adresse e-mail",
+    "NOTIFICATIONS": "Notifications de l'Application",
+    "NOTIFICATIONS_DESC": "Contrôlez les paramètres de notification dans l'application",
+    "ENABLE_NOTIFICATIONS": "Activer les Notifications",
+    "ORDER_NOTIFICATIONS": "Notifications de Commande",
+    "PROMOTION_NOTIFICATIONS": "Notifications de Promotion",
+    "REFRESH_TOKEN": "Actualiser le Token de Notification",
+    "DEVICE_ID": "ID de l'Appareil",
+    "GENERAL_SETTINGS": "Paramètres Généraux",
+    "THEME": "Thème",
+    "DARK_MODE": "Mode Sombre",
+    "DATA_SAVING": "Économie de Données",
+    "APP_INFO": "Informations de l'Application",
+    "APP_VERSION": "Version de l'Application",
+    "ABOUT": "À Propos",
+    "VERSION": "Version",
+    "LOGOUT": "Déconnexion"
+  },
+  "AUTH": {
+    "LOGIN": "Connexion",
+    "REGISTER": "S'inscrire",
+    "FORGOT_PASSWORD": "Mot de passe oublié?",
+    "EMAIL": "E-mail",
+    "PASSWORD": "Mot de Passe",
+    "CONFIRM_PASSWORD": "Confirmer le Mot de Passe",
+    "REMEMBER_ME": "Se Souvenir de Moi",
+    "DONT_HAVE_ACCOUNT": "Vous n'avez pas de compte?",
+    "ALREADY_HAVE_ACCOUNT": "Vous avez déjà un compte?",
+    "RESET_PASSWORD": "Réinitialiser le Mot de Passe",
+    "PHONE_NUMBER": "Numéro de Téléphone",
+    "VERIFY_CODE": "Vérifier le Code",
+    "SEND_CODE": "Envoyer le Code"
+  },
+  "NAVIGATION": {
+    "HOME": "Accueil",
+    "SHOP": "Boutique",
+    "CATEGORIES": "Catégories",
+    "CART": "Panier",
+    "ACCOUNT": "Compte",
+    "SEARCH": "Rechercher"
+  },
+  "NOTIFICATIONS": {
+    "TITLE": "Notifications",
+    "EMPTY": "Aucune notification",
+    "MARK_ALL_READ": "Marquer tout comme lu"
+  },
+  "ERRORS": {
+    "GENERAL": "Une erreur s'est produite",
+    "NETWORK": "Erreur réseau, veuillez vérifier votre connexion",
+    "NOT_FOUND": "Non trouvé",
+    "UNAUTHORIZED": "Accès non autorisé",
+    "VALIDATION": "Veuillez vérifier votre saisie et réessayer"
+  },
+  "BUTTONS": {
+    "OK": "OK",
+    "CANCEL": "Annuler",
+    "SAVE": "Enregistrer",
+    "CONFIRM": "Confirmer",
+    "DELETE": "Supprimer",
+    "APPLY": "Appliquer",
+    "CLOSE": "Fermer",
+    "BACK": "Retour",
+    "NEXT": "Suivant"
+  },
+  "COMMON": {
+    "LOADING": "Chargement...",
+    "CURRENCY": "EUR",
+    "YES": "Oui",
+    "NO": "Non",
+    "SEARCH": "Rechercher",
+    "FILTER": "Filtrer",
+    "SORT": "Trier",
+    "DATE": "Date",
+    "STATUS": "Statut",
+    "DETAILS": "Détails"
+  }
+}

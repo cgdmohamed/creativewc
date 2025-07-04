@@ -1,0 +1,356 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import '@ionic/angular/css/display.css';
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* Custom styles for our app */
+@import "./theme/rtl.scss";
+@import "./theme/fonts.scss";
+
+/* Content padding for bottom tabs */
+ion-content {
+  --padding-bottom: 70px; /* Add padding for bottom tabs */
+}
+
+/* RTL Direction support */
+[dir="rtl"] {
+  .swiper-button-next {
+    left: 10px;
+    right: auto;
+  }
+
+  .swiper-button-prev {
+    right: 10px;
+    left: auto;
+  }
+}
+
+/* Dark theme support */
+.dark-theme {
+  --ion-color-primary: #ed1c24;
+  --ion-color-primary-rgb: 255, 107, 120;
+}
+
+/* Professional loading progress indicator */
+ion-progress-bar {
+  --background: transparent;
+  --progress-background: #ed1c24;
+  height: 3px;
+  border-radius: 3px;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  
+  /* Add slight blur effect below */
+  box-shadow: 0 1px 3px rgba(236, 28, 36, 0.2);
+}
+
+/* Add subtle animation to make it more professional */
+@keyframes progressPulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+ion-progress-bar.animate {
+  animation: progressPulse 1.5s infinite ease-in-out;
+}
+
+/* Dark mode additional properties */
+.dark-theme {
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18, 18, 18;
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+  --ion-border-color: #222222;
+  --ion-item-background: #1e1e1e;
+  --ion-toolbar-background: #1e1e1e;
+  --ion-tab-bar-background: #1f1f1f;
+  --ion-card-background: #1e1e1e;
+  
+  ion-content {
+    --background: #121212;
+  }
+  
+  .product-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+  }
+  
+  .section-header h2 {
+    color: #fff;
+  }
+}
+
+/* Text sizes */
+.text-size-small {
+  --ion-font-size-root: 14px;
+  
+  h1 { font-size: 20px; }
+  h2 { font-size: 18px; }
+  h3 { font-size: 16px; }
+  p { font-size: 14px; }
+}
+
+.text-size-medium {
+  --ion-font-size-root: 16px;
+  
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+  p { font-size: 16px; }
+}
+
+.text-size-large {
+  --ion-font-size-root: 18px;
+  
+  h1 { font-size: 28px; }
+  h2 { font-size: 24px; }
+  h3 { font-size: 20px; }
+  p { font-size: 18px; }
+}
+
+/* Primary brand color */
+:root {
+  --ion-color-primary: #ed1c24;
+  --ion-color-primary-rgb: 233, 50, 74;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #cd2c41;
+  --ion-color-primary-tint: #eb475c;
+}
+
+/* Font styles are defined in theme/fonts.scss */
+
+/* Additional font overrides for specific components */
+ion-button {
+  font-family: 'Alexandria', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* Filter buttons */
+.filter-button, 
+ion-button.filter-button, 
+ion-button.filter-button span,
+ion-button.filter-button ion-text,
+[data-text="فلترة"],
+button:contains("فلترة") {
+  font-family: 'Alexandria', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* Add to cart buttons */
+.cart-button, 
+ion-button.cart-button, 
+ion-button.cart-button span, 
+ion-button.cart-button ion-text,
+[data-text="إضافة للسلة"],
+button:contains("إضافة للسلة") {
+  font-family: 'Alexandria', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* Browser products text */
+.browse-products, [data-text="تصفح المنتجات"] {
+  font-family: 'Alexandria', 'Roboto', 'Helvetica Neue', sans-serif !important;
+}
+
+/* Category titles */
+.category-title, 
+.section-title, 
+.category-name, 
+ion-card-title, 
+h1, h2, h3, h4, h5, h6,
+.category-item ion-label {
+  font-family: 'Alexandria', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* 
+* Custom Pull-to-Refresh Animation Styles
+* These styles enhance the default Ionic pull-to-refresh animations
+*/
+.custom-refresher {
+  transition: all 0.3s ease-out !important;
+}
+
+.custom-refresher.refreshing-animation .refresher-refreshing-icon {
+  color: var(--ion-color-primary);
+  transform-origin: center center;
+}
+
+.custom-refresher.pulling-animation .refresher-pulling-icon {
+  color: var(--ion-color-primary);
+  transition: transform 0.2s ease-out !important;
+}
+
+.custom-refresher .refresher-pulling-text,
+.custom-refresher .refresher-refreshing-text {
+  color: var(--ion-color-primary);
+  font-weight: 500;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+ion-refresher.custom-refresher {
+  z-index: 100;
+}
+
+ion-refresher.custom-refresher .custom-spinner {
+  position: relative;
+}
+
+ion-refresher.custom-refresher .custom-spinner::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(236, 28, 36, 0.2);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+}
+
+/* Pulsing badge style */
+.pulse-badge {
+  position: relative;
+  display: inline-block;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 8px;
+  height: 8px;
+  background-color: #ec1c24;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  color: white;
+  animation: none;
+  box-shadow: 0 0 0 rgba(236, 28, 36, 0.5);
+}
+
+/* Only add the pulsing effect when active */
+.active-pulse .notification-badge {
+  animation: pulseBadge 1.5s infinite;
+}
+
+@keyframes pulseBadge {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(236, 28, 36, 0.7);
+  }
+  
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 6px rgba(236, 28, 36, 0.2);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(236, 28, 36, 0);
+  }
+}
+
+/* Badge styles moved to the notification-badge class above */
+
+/* Style for search alert */
+.search-alert {
+  --backdrop-opacity: 0.7;
+  
+  .alert-wrapper {
+    border-radius: 12px;
+    max-width: 90%;
+  }
+  
+  .alert-head {
+    text-align: center;
+  }
+  
+  .alert-input-group {
+    padding: 10px 0;
+  }
+  
+  .alert-input {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    text-align: right;
+    direction: rtl;
+  }
+  
+  .alert-button-group {
+    justify-content: space-between;
+    padding: 8px;
+  }
+  
+  .alert-button {
+    color: var(--ion-color-danger);
+    
+    &.alert-button-confirm {
+      background-color: var(--ion-color-danger);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+  }
+}

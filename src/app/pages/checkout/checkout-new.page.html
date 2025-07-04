@@ -1,0 +1,508 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/cart" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      {{ currentStep === 'shipping' ? 'إتمام الطلب' : currentStep === 'payment' ? 'طريقة الدفع' : 'تأكيد الطلب' }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="checkout-container">
+    <!-- Step indicator -->
+    <div class="step-indicator-wrapper">
+      <div class="step-indicator">
+        <div class="step" 
+             [ngClass]="{'active': currentStep === 'shipping', 'completed': currentStep === 'payment' || currentStep === 'confirmation'}"
+             (click)="onStepChange('shipping')">
+          <div class="step-number">
+            <ng-container *ngIf="currentStep === 'payment' || currentStep === 'confirmation'; else stepNumber1">
+              <ion-icon name="checkmark"></ion-icon>
+            </ng-container>
+            <ng-template #stepNumber1>1</ng-template>
+          </div>
+          <div class="step-label">الشحن</div>
+        </div>
+        
+        <div class="step-line"></div>
+        
+        <div class="step" 
+             [ngClass]="{'active': currentStep === 'payment', 'completed': currentStep === 'confirmation'}"
+             (click)="onStepChange('payment')">
+          <div class="step-number">
+            <ng-container *ngIf="currentStep === 'confirmation'; else stepNumber2">
+              <ion-icon name="checkmark"></ion-icon>
+            </ng-container>
+            <ng-template #stepNumber2>2</ng-template>
+          </div>
+          <div class="step-label">الدفع</div>
+        </div>
+        
+        <div class="step-line"></div>
+        
+        <div class="step" 
+             [ngClass]="{'active': currentStep === 'confirmation'}">
+          <div class="step-number">3</div>
+          <div class="step-label">التأكيد</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipping Information (Step 1) -->
+    <div *ngIf="currentStep === 'shipping'" class="section-container">
+      <h2 class="section-title">معلومات الشحن</h2>
+      
+      <!-- Saved addresses section -->
+      <div *ngIf="savedAddresses && savedAddresses.length > 0" class="saved-addresses">
+        <div class="address-scroll-container">
+          <div class="address-card" *ngFor="let address of savedAddresses" 
+              [ngClass]="{'selected': address && address.id && selectedAddressId === address.id}"
+              (click)="address && address.id && selectAddress(address.id)">
+            <h3 class="address-name">{{ address?.name || address?.address_nickname || 'المنزل' }}</h3>
+            <p class="address-details">
+              {{ address?.first_name || '' }} {{ address?.last_name || '' }}<br>
+              {{ address?.address_1 || '' }}<br>
+              {{ address?.city || '' }} / {{ address?.state || '' }}<br>
+              {{ address?.country || 'المملكة العربية السعودية' }}<br>
+              {{ address?.phone || '' }}
+            </p>
+            <div class="address-email">{{ address?.email || '' }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Add new address form -->
+      <div class="divider-text">أو إضافة عنوان جديد</div>
+      
+      <form [formGroup]="shippingForm" (ngSubmit)="nextStep()">
+        <!-- First row with first and last name side by side -->
+        <div class="form-row-split">
+          <div class="split-item">
+            <ion-item>
+              <ion-input formControlName="firstName" placeholder="الاسم الأول"></ion-input>
+            </ion-item>
+            <div class="validation-error" 
+                *ngIf="shippingForm.get('firstName')?.invalid && (shippingForm.get('firstName')?.dirty || shippingForm.get('firstName')?.touched)">
+              الاسم الأول مطلوب
+            </div>
+          </div>
+          
+          <div class="split-item">
+            <ion-item>
+              <ion-input formControlName="lastName" placeholder="الاسم الأخير"></ion-input>
+            </ion-item>
+            <div class="validation-error" 
+                *ngIf="shippingForm.get('lastName')?.invalid && (shippingForm.get('lastName')?.dirty || shippingForm.get('lastName')?.touched)">
+              الاسم الأخير مطلوب
+            </div>
+          </div>
+        </div>
+        
+        <!-- Building and street name -->
+        <div class="form-row">
+          <ion-item>
+            <ion-input formControlName="address1" placeholder="رقم البناية واسم الشارع"></ion-input>
+          </ion-item>
+          <div class="validation-error" 
+               *ngIf="shippingForm.get('address1')?.invalid && (shippingForm.get('address1')?.dirty || shippingForm.get('address1')?.touched)">
+            العنوان مطلوب
+          </div>
+        </div>
+        
+        <!-- Neighborhood selector -->
+        <div class="form-row">
+          <ion-item>
+            <ion-select formControlName="city" placeholder="الحي / المنطقة" interface="popover" cancelText="إلغاء" okText="اختيار">
+              <ion-select-option value="حي الربيع">حي الربيع</ion-select-option>
+              <ion-select-option value="حي الندى">حي الندى</ion-select-option>
+              <ion-select-option value="حي الصحافة">حي الصحافة</ion-select-option>
+              <ion-select-option value="حي النرجس">حي النرجس</ion-select-option>
+              <ion-select-option value="حي العارض">حي العارض</ion-select-option>
+              <ion-select-option value="حي النفل">حي النفل</ion-select-option>
+              <ion-select-option value="حي العقيق">حي العقيق</ion-select-option>
+              <ion-select-option value="حي الوادي">حي الوادي</ion-select-option>
+              <ion-select-option value="حي الغدير">حي الغدير</ion-select-option>
+              <ion-select-option value="حي الياسمين">حي الياسمين</ion-select-option>
+              <ion-select-option value="حي الفلاح">حي الفلاح</ion-select-option>
+              <ion-select-option value="حي بنبان">حي بنبان</ion-select-option>
+              <ion-select-option value="حي القيروان">حي القيروان</ion-select-option>
+              <ion-select-option value="حي حطين">حي حطين</ion-select-option>
+              <ion-select-option value="حي الملقا">حي الملقا</ion-select-option>
+              <ion-select-option value="حي الروضة">حي الروضة</ion-select-option>
+              <ion-select-option value="حي الرمال">حي الرمال</ion-select-option>
+              <ion-select-option value="حي المونسية">حي المونسية</ion-select-option>
+              <ion-select-option value="حي قرطبة">حي قرطبة</ion-select-option>
+              <ion-select-option value="حي الجنادرية">حي الجنادرية</ion-select-option>
+              <ion-select-option value="حي القادسية">حي القادسية</ion-select-option>
+              <ion-select-option value="حي اليرموك">حي اليرموك</ion-select-option>
+              <ion-select-option value="حي غرناطة">حي غرناطة</ion-select-option>
+              <ion-select-option value="حي أشبيلية">حي أشبيلية</ion-select-option>
+              <ion-select-option value="حي الحمراء">حي الحمراء</ion-select-option>
+              <ion-select-option value="حي المعيزلية">حي المعيزلية</ion-select-option>
+              <ion-select-option value="حي الخليج">حي الخليج</ion-select-option>
+              <ion-select-option value="حي الملك فيصل">حي الملك فيصل</ion-select-option>
+              <ion-select-option value="حي القدس">حي القدس</ion-select-option>
+              <ion-select-option value="حي النهضة">حي النهضة</ion-select-option>
+              <ion-select-option value="حي الأندلس">حي الأندلس</ion-select-option>
+              <ion-select-option value="العليا">العليا</ion-select-option>
+              <ion-select-option value="حي السليمانية">حي السليمانية</ion-select-option>
+              <ion-select-option value="حي الملك عبد العزيز">حي الملك عبد العزيز</ion-select-option>
+              <ion-select-option value="حي الملك عبد الله">حي الملك عبد الله</ion-select-option>
+              <ion-select-option value="حي الورود">حي الورود</ion-select-option>
+              <ion-select-option value="حي صلاح الدين">حي صلاح الدين</ion-select-option>
+              <ion-select-option value="حي الملك فهد">حي الملك فهد</ion-select-option>
+              <ion-select-option value="حي المرسلات">حي المرسلات</ion-select-option>
+              <ion-select-option value="حي النزهة">حي النزهة</ion-select-option>
+              <ion-select-option value="حي المغرزات">حي المغرزات</ion-select-option>
+              <ion-select-option value="حي المروج">حي المروج</ion-select-option>
+              <ion-select-option value="المصيف">المصيف</ion-select-option>
+              <ion-select-option value="حي التعاون">حي التعاون</ion-select-option>
+              <ion-select-option value="حي الإزدهار">حي الإزدهار</ion-select-option>
+              <ion-select-option value="حي المعذر">حي المعذر</ion-select-option>
+              <ion-select-option value="حي المحمدية">حي المحمدية</ion-select-option>
+              <ion-select-option value="حي الرحمانية">حي الرحمانية</ion-select-option>
+              <ion-select-option value="حي الرائد">حي الرائد</ion-select-option>
+              <ion-select-option value="حي النخيل">حي النخيل</ion-select-option>
+              <ion-select-option value="حي أم الحمام الشرقي">حي أم الحمام الشرقي</ion-select-option>
+              <ion-select-option value="حي أم الحمام الغربي">حي أم الحمام الغربي</ion-select-option>
+              <ion-select-option value="حي السفارات">حي السفارات</ion-select-option>
+              <ion-select-option value="حي المهدية">حي المهدية</ion-select-option>
+              <ion-select-option value="حي عرقة">حي عرقة</ion-select-option>
+              <ion-select-option value="حي ظهرة لبن">حي ظهرة لبن</ion-select-option>
+              <ion-select-option value="حي الخزامى">حي الخزامى</ion-select-option>
+              <ion-select-option value="حي النسيم الشرقي">حي النسيم الشرقي</ion-select-option>
+              <ion-select-option value="حي النسيم الغربي">حي النسيم الغربي</ion-select-option>
+              <ion-select-option value="حي السلام">حي السلام</ion-select-option>
+              <ion-select-option value="حي الريان">حي الريان</ion-select-option>
+              <ion-select-option value="حي الروابي">حي الروابي</ion-select-option>
+              <ion-select-option value="حي النظيم">حي النظيم</ion-select-option>
+              <ion-select-option value="حي المنار">حي المنار</ion-select-option>
+              <ion-select-option value="حي الندوة">حي الندوة</ion-select-option>
+              <ion-select-option value="حي جرير">حي جرير</ion-select-option>
+              <ion-select-option value="حي الربوة">حي الربوة</ion-select-option>
+              <ion-select-option value="حي الزهراء">حي الزهراء</ion-select-option>
+              <ion-select-option value="حي الصفا">حي الصفا</ion-select-option>
+              <ion-select-option value="حي الضباط">حي الضباط</ion-select-option>
+              <ion-select-option value="حي الملز">حي الملز</ion-select-option>
+              <ion-select-option value="حي الوزارات">حي الوزارات</ion-select-option>
+              <ion-select-option value="حي الفاروق">حي الفاروق</ion-select-option>
+              <ion-select-option value="حي العمل">حي العمل</ion-select-option>
+              <ion-select-option value="حي ثليم">حي ثليم</ion-select-option>
+              <ion-select-option value="حي المربع">حي المربع</ion-select-option>
+              <ion-select-option value="حي الفوطة">حي الفوطة</ion-select-option>
+              <ion-select-option value="حي الرفيعة">حي الرفيعة</ion-select-option>
+              <ion-select-option value="حي الهدا">حي الهدا</ion-select-option>
+              <ion-select-option value="حي الشرقية">حي الشرقية</ion-select-option>
+              <ion-select-option value="الناصرية">الناصرية</ion-select-option>
+              <ion-select-option value="حي صياح">حي صياح</ion-select-option>
+              <ion-select-option value="حي الوشام">حي الوشام</ion-select-option>
+              <ion-select-option value="حي النموذجية">حي النموذجية</ion-select-option>
+              <ion-select-option value="حي المؤتمرات">حي المؤتمرات</ion-select-option>
+              <ion-select-option value="حي البديعة">حي البديعة</ion-select-option>
+              <ion-select-option value="حي أم سليم">حي أم سليم</ion-select-option>
+              <ion-select-option value="حي الشميسي">حي الشميسي</ion-select-option>
+              <ion-select-option value="حي الجرادية">حي الجرادية</ion-select-option>
+              <ion-select-option value="حي الفاخرية">حي الفاخرية</ion-select-option>
+              <ion-select-option value="حي عليشة">حي عليشة</ion-select-option>
+              <ion-select-option value="هجرة وادي لبن">هجرة وادي لبن</ion-select-option>
+              <ion-select-option value="حي العريجاء">حي العريجاء</ion-select-option>
+              <ion-select-option value="حي العريجاء الوسطى">حي العريجاء الوسطى</ion-select-option>
+              <ion-select-option value="حي العريجاء الغربية">حي العريجاء الغربية</ion-select-option>
+              <ion-select-option value="حي الدريهمية">حي الدريهمية</ion-select-option>
+              <ion-select-option value="حي شبرا">حي شبرا</ion-select-option>
+              <ion-select-option value="حي السويدي">حي السويدي</ion-select-option>
+              <ion-select-option value="حي السويدي الغربي">حي السويدي الغربي</ion-select-option>
+              <ion-select-option value="حي ظهرة البديعة">حي ظهرة البديعة</ion-select-option>
+              <ion-select-option value="حي سلطانة">حي سلطانة</ion-select-option>
+              <ion-select-option value="حي ظهرة نمار">حي ظهرة نمار</ion-select-option>
+              <ion-select-option value="حي ديراب">حي ديراب</ion-select-option>
+              <ion-select-option value="حي نمار">حي نمار</ion-select-option>
+              <ion-select-option value="حي الحزم">حي الحزم</ion-select-option>
+              <ion-select-option value="حي أحد">حي أحد</ion-select-option>
+              <ion-select-option value="حي عكاظ">حي عكاظ</ion-select-option>
+              <ion-select-option value="حي الشفاء">حي الشفاء</ion-select-option>
+              <ion-select-option value="حي المروة">حي المروة</ion-select-option>
+              <ion-select-option value="حي بدر">حي بدر</ion-select-option>
+              <ion-select-option value="حي المصانع">حي المصانع</ion-select-option>
+              <ion-select-option value="حي المنصورية">حي المنصورية</ion-select-option>
+              <ion-select-option value="حي عريض">حي عريض</ion-select-option>
+              <ion-select-option value="حي العماجية">حي العماجية</ion-select-option>
+              <ion-select-option value="حي خشم العان">حي خشم العان</ion-select-option>
+              <ion-select-option value="حي الدفاع">حي الدفاع</ion-select-option>
+              <ion-select-option value="حي المناخ">حي المناخ</ion-select-option>
+              <ion-select-option value="حي السلي">حي السلي</ion-select-option>
+              <ion-select-option value="حي النور">حي النور</ion-select-option>
+              <ion-select-option value="حي الإسكان">حي الإسكان</ion-select-option>
+              <ion-select-option value="حي الصناعية الجديدة">حي الصناعية الجديدة</ion-select-option>
+              <ion-select-option value="حي الفيحاء">حي الفيحاء</ion-select-option>
+              <ion-select-option value="حي الجزيرة">حي الجزيرة</ion-select-option>
+              <ion-select-option value="حي السعادة">حي السعادة</ion-select-option>
+              <ion-select-option value="حي هيت">حي هيت</ion-select-option>
+              <ion-select-option value="حي البرية">حي البرية</ion-select-option>
+              <ion-select-option value="حي المشاعل">حي المشاعل</ion-select-option>
+              <ion-select-option value="حي الدوبية">حي الدوبية</ion-select-option>
+              <ion-select-option value="حي القرى">حي القرى</ion-select-option>
+              <ion-select-option value="حي الصناعية">حي الصناعية</ion-select-option>
+              <ion-select-option value="حي الوسيطاء">حي الوسيطاء</ion-select-option>
+              <ion-select-option value="حي معكال">حي معكال</ion-select-option>
+              <ion-select-option value="حي الفيصلية">حي الفيصلية</ion-select-option>
+              <ion-select-option value="حي منفوحة">حي منفوحة</ion-select-option>
+              <ion-select-option value="حي المنصورة">حي المنصورة</ion-select-option>
+              <ion-select-option value="حي اليمامة">حي اليمامة</ion-select-option>
+              <ion-select-option value="حي جبرة">حي جبرة</ion-select-option>
+              <ion-select-option value="حي عتيقة">حي عتيقة</ion-select-option>
+              <ion-select-option value="حي غبيراء">حي غبيراء</ion-select-option>
+              <ion-select-option value="حي البطيحا">حي البطيحا</ion-select-option>
+              <ion-select-option value="حي الخالدية">حي الخالدية</ion-select-option>
+              <ion-select-option value="حي الديرة">حي الديرة</ion-select-option>
+              <ion-select-option value="حي العود">حي العود</ion-select-option>
+              <ion-select-option value="حي المرقب">حي المرقب</ion-select-option>
+              <ion-select-option value="حي منفوحة الجديدة">حي منفوحة الجديدة</ion-select-option>
+              <ion-select-option value="حي العزيزية">حي العزيزية</ion-select-option>
+              <ion-select-option value="حي طيبة">حي طيبة</ion-select-option>
+              <ion-select-option value="حي المصفاة">حي المصفاة</ion-select-option>
+              <ion-select-option value="حي الدار البيضاء">حي الدار البيضاء</ion-select-option>
+              <ion-select-option value="حي الحاير">حي الحاير</ion-select-option>
+              <ion-select-option value="حي الغنامية">حي الغنامية</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <div class="validation-error" 
+               *ngIf="shippingForm.get('city')?.invalid && (shippingForm.get('city')?.dirty || shippingForm.get('city')?.touched)">
+            الحي / المنطقة مطلوب
+          </div>
+        </div>
+        
+        <!-- Hidden city field (fixed to Riyadh) -->
+        <div class="form-row hidden-field">
+          <ion-item>
+            <ion-input formControlName="state" value="الرياض" readonly></ion-input>
+          </ion-item>
+        </div>
+        
+        <!-- Hidden country field (fixed to Saudi Arabia) -->
+        <div class="form-row hidden-field">
+          <ion-item>
+            <ion-input formControlName="country" value="المملكة العربية السعودية" readonly></ion-input>
+          </ion-item>
+        </div>
+        
+        <!-- Phone number -->
+        <div class="form-row">
+          <ion-item>
+            <ion-input formControlName="phone" placeholder="رقم الجوال (05xxxxxxxx)" type="tel"></ion-input>
+          </ion-item>
+          <div class="validation-error" 
+               *ngIf="shippingForm.get('phone')?.invalid && (shippingForm.get('phone')?.dirty || shippingForm.get('phone')?.touched)">
+            رقم الجوال مطلوب
+          </div>
+        </div>
+        
+        <!-- Email -->
+        <div class="form-row">
+          <ion-item>
+            <ion-input formControlName="email" placeholder="البريد الإلكتروني (example@email.com)" type="email"></ion-input>
+          </ion-item>
+          <div class="validation-error" 
+               *ngIf="shippingForm.get('email')?.invalid && (shippingForm.get('email')?.dirty || shippingForm.get('email')?.touched)">
+            البريد الإلكتروني غير صحيح
+          </div>
+        </div>
+        
+        <div class="nav-buttons">
+          <ion-button type="submit" expand="block" [disabled]="!shippingForm.valid && !selectedAddressId">
+            متابعة إلى الدفع
+          </ion-button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Payment Method (Step 2) -->
+    <div *ngIf="currentStep === 'payment'" class="section-container">
+      <h2 class="section-title">طريقة الدفع</h2>
+      
+      <div class="payment-methods">
+        <div class="payment-method-item" 
+             [ngClass]="{'selected': paymentMethod === 'creditCard'}"
+             (click)="selectPaymentMethod('creditCard')">
+          <div class="payment-method-radio">
+            <ion-icon name="radio-button-on-outline" *ngIf="paymentMethod === 'creditCard'"></ion-icon>
+            <ion-icon name="radio-button-off-outline" *ngIf="paymentMethod !== 'creditCard'"></ion-icon>
+          </div>
+          <div class="payment-method-content">
+            <div class="payment-method-title">البطاقات الائتمانية</div>
+            <div class="payment-method-cards">
+              <img src="assets/icons/payment/mada.svg" alt="Mada">
+              <img src="assets/icons/payment/visa.svg" alt="Visa">
+              <img src="assets/icons/payment/mastercard.svg" alt="Mastercard">
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="isApplePayAvailable" class="payment-method-item" 
+             [ngClass]="{'selected': paymentMethod === 'applePay'}"
+             (click)="selectPaymentMethod('applePay')">
+          <div class="payment-method-radio">
+            <ion-icon name="radio-button-on-outline" *ngIf="paymentMethod === 'applePay'"></ion-icon>
+            <ion-icon name="radio-button-off-outline" *ngIf="paymentMethod !== 'applePay'"></ion-icon>
+          </div>
+          <div class="payment-method-content">
+            <div class="payment-method-title">Apple Pay</div>
+            <div class="payment-method-cards">
+              <img src="assets/icons/payment/applepay.svg" alt="Apple Pay">
+            </div>
+          </div>
+        </div>
+        
+        <div class="payment-method-item" 
+             [ngClass]="{'selected': paymentMethod === 'stcPay'}"
+             (click)="selectPaymentMethod('stcPay')">
+          <div class="payment-method-radio">
+            <ion-icon name="radio-button-on-outline" *ngIf="paymentMethod === 'stcPay'"></ion-icon>
+            <ion-icon name="radio-button-off-outline" *ngIf="paymentMethod !== 'stcPay'"></ion-icon>
+          </div>
+          <div class="payment-method-content">
+            <div class="payment-method-title">STCPay</div>
+            <div class="payment-method-cards">
+              <img src="assets/icons/payment/stcpay.svg" alt="STC Pay">
+            </div>
+          </div>
+        </div>
+        
+        <div class="payment-method-item" 
+             [ngClass]="{'selected': paymentMethod === 'cod'}"
+             (click)="selectPaymentMethod('cod')">
+          <div class="payment-method-radio">
+            <ion-icon name="radio-button-on-outline" *ngIf="paymentMethod === 'cod'"></ion-icon>
+            <ion-icon name="radio-button-off-outline" *ngIf="paymentMethod !== 'cod'"></ion-icon>
+          </div>
+          <div class="payment-method-content">
+            <div class="payment-method-title">الدفع عند الاستلام</div>
+            <div class="payment-method-cards">
+              <img src="assets/icons/payment/cod.svg" alt="Cash on Delivery">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Credit Card Form -->
+      <div *ngIf="paymentMethod === 'creditCard' && showCreditCardForm" class="credit-card-form">
+        <div class="form-row">
+          <ion-item>
+            <ion-input [(ngModel)]="creditCardHolderName" label="الإسم على البطاقة" placeholder="الإسم على البطاقة"></ion-input>
+          </ion-item>
+        </div>
+        
+        <div class="form-row">
+          <ion-item>
+            <ion-input [(ngModel)]="creditCardNumber" label="رقم البطاقة" placeholder="رقم البطاقة"></ion-input>
+          </ion-item>
+        </div>
+        
+        <div class="form-row-split">
+          <ion-item>
+            <ion-input [(ngModel)]="creditCardExpiry" label="MM / YY" placeholder="MM / YY"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input [(ngModel)]="creditCardCvc" label="CVC" placeholder="CVC" type="number"></ion-input>
+          </ion-item>
+        </div>
+      </div>
+      
+      <!-- STC Pay Form -->
+      <div *ngIf="paymentMethod === 'stcPay' && isStcPaySelected" class="stc-pay-container">
+        <h3 class="stc-pay-title">أدخل رقم هاتفك المرتبط بـ STC Pay</h3>
+        <div class="stc-pay-form">
+          <ion-input [(ngModel)]="phoneNumber" placeholder="05X XXX XXXX" type="tel"></ion-input>
+          <ion-button (click)="processStcPay()">
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+            دفع <app-currency-icon size="small"></app-currency-icon> {{ (cart?.total | number:'1.2-2') || '120.00' }}
+          </ion-button>
+        </div>
+      </div>
+      
+      <!-- Order summary -->
+      <div class="order-summary">
+        <h3 class="summary-title">ملخص الطلب</h3>
+        
+        <div class="summary-line">
+          <span class="label">المجموع الفرعي</span>
+          <span class="value">{{ cart?.subtotal.toFixed(2) }} <app-currency-icon size="small"></app-currency-icon></span>
+        </div>
+        
+        <div class="summary-line" *ngIf="cart?.discount > 0">
+          <span class="label">الخصم</span>
+          <span class="value discount">- {{ cart?.discount.toFixed(2) }} <app-currency-icon size="small"></app-currency-icon></span>
+        </div>
+        
+        <div class="summary-line">
+          <span class="label">الشحن</span>
+          <span class="value">{{ cart?.shipping.toFixed(2) }} <app-currency-icon size="small"></app-currency-icon></span>
+        </div>
+        
+        <div class="summary-line tax-line">
+          <span class="label">ضريبة القيمة المضافة (15%)</span>
+          <span class="value">{{ cart?.vat.toFixed(2) }} <app-currency-icon size="small"></app-currency-icon></span>
+          <div class="tax-info">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <div class="tax-tooltip">
+              تُطبق ضريبة القيمة المضافة بنسبة 15% على جميع المنتجات وفقًا لأنظمة الهيئة العامة للزكاة والدخل في المملكة العربية السعودية
+            </div>
+          </div>
+        </div>
+        
+        <div class="summary-line total">
+          <span class="label">الإجمالي</span>
+          <span class="value">{{ cart?.total.toFixed(2) }} <app-currency-icon size="small"></app-currency-icon></span>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <ng-container *ngIf="paymentMethod === 'creditCard'">
+          <ion-button expand="block" (click)="processPayment()">
+            دفع <app-currency-icon size="small"></app-currency-icon> {{ (cart?.total | number:'1.2-2') || '120.00' }}
+          </ion-button>
+        </ng-container>
+        
+        <ng-container *ngIf="paymentMethod === 'applePay'">
+          <ion-button expand="block" (click)="processApplePay()" class="apple-pay-button">
+            شراء باستخدام Apple Pay
+          </ion-button>
+        </ng-container>
+        
+        <ng-container *ngIf="paymentMethod === 'cod'">
+          <ion-button expand="block" (click)="processCashOnDelivery()">
+            دفع عند الاستلام
+          </ion-button>
+        </ng-container>
+        
+        <ion-button expand="block" fill="outline" (click)="prevStep()">
+          عودة
+        </ion-button>
+      </div>
+    </div>
+    
+    <!-- Order Confirmation (Step 3) -->
+    <div *ngIf="currentStep === 'confirmation'" class="section-container">
+      <div class="order-confirmation">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <h2>تم استلام طلبك بنجاح</h2>
+        <div class="order-number">
+          #123456
+        </div>
+        <p class="confirmation-message">
+          شكرا لك على طلبك. سوف تتلقى تنبيهات بإتمام طلبك.
+        </p>
+        <div class="confirmation-buttons">
+          <ion-button expand="block" routerLink="/home">
+            العودة للرئيسية
+          </ion-button>
+          <ion-button expand="block" fill="outline" routerLink="/orders">
+            تتبع الطلب
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

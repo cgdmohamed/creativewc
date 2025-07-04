@@ -1,0 +1,43 @@
+<!-- Bottom Tab Navigation -->
+<div class="tab-bar-container" *ngIf="showTabs">
+  <div class="tab-bar">
+    <div class="tab-item" 
+         [class.active]="activeTab === 'home'" 
+         [routerLink]="['/home']">
+      <ion-icon name="home-outline"></ion-icon>
+      <span>الرئيسية</span>
+    </div>
+    
+    <div class="tab-item" 
+         [class.active]="activeTab === 'categories'" 
+         [routerLink]="['/categories']">
+      <ion-icon name="grid-outline"></ion-icon>
+      <span>التصنيفات</span>
+    </div>
+    
+    <div class="tab-item pulse-badge"
+         [class.active]="activeTab === 'wishlist'"
+         [class.active-pulse]="wishlistItemCount > 0"
+         [routerLink]="['/wishlist']">
+      <ion-icon name="heart-outline"></ion-icon>
+      <span>المفضلة</span>
+      <span *ngIf="wishlistItemCount > 0" class="notification-badge"></span>
+    </div>
+    
+    <div class="tab-item pulse-badge"
+         [class.active]="activeTab === 'cart'"
+         [class.active-pulse]="cartItemCount > 0"
+         [routerLink]="['/cart']">
+      <ion-icon name="bag-outline"></ion-icon>
+      <span>السلة</span>
+      <span *ngIf="cartItemCount > 0" class="notification-badge"></span>
+    </div>
+    
+    <div class="tab-item" 
+         [class.active]="activeTab === 'profile'" 
+         [routerLink]="['/profile']">
+      <ion-icon name="person-outline"></ion-icon>
+      <span>حسابي</span>
+    </div>
+  </div>
+</div>

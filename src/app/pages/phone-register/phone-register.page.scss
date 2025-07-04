@@ -1,0 +1,276 @@
+.register-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.logo-container {
+  text-align: center;
+  margin: 20px auto;
+  
+  img {
+    max-width: 140px;
+    margin-bottom: 10px;
+  }
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.form-container {
+  margin-top: 16px;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --background: transparent;
+    margin-bottom: 16px;
+    
+    ion-label {
+      --color: #666;
+      margin-bottom: 8px;
+    }
+    
+    ion-input {
+      --background: #f8f8f8;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      --border-radius: 8px;
+      margin-top: 8px;
+      font-size: 16px;
+    }
+  }
+  
+  .phone-input-container {
+    display: flex;
+    margin-bottom: 16px;
+    
+    .country-code {
+      flex: 0 0 80px;
+      margin-left: 8px;
+      margin-bottom: 0;
+      
+      ion-input {
+        --background: #f0f0f0;
+        --padding-start: 8px;
+        --padding-end: 8px;
+        --padding-top: 14px;
+        --padding-bottom: 14px;
+        --border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: center;
+        --placeholder-color: #333;
+        --color: #333;
+        --opacity: 1;
+      }
+    }
+    
+    .phone-input {
+      flex: 1;
+      margin-bottom: 0;
+      
+      ion-input {
+        text-align: left;
+        direction: ltr;
+      }
+    }
+  }
+}
+
+.validation-errors {
+  margin: -8px 0 16px;
+  font-size: 12px;
+  padding-right: 16px;
+}
+
+.submit-button {
+  --background: #ec1c24;
+  --background-activated: #d41920;
+  --border-radius: 8px;
+  height: 48px;
+  font-weight: 600;
+  margin-top: 24px;
+}
+
+.back-button {
+  --border-color: #ec1c24;
+  --color: #ec1c24;
+  --border-radius: 8px;
+  height: 48px;
+  font-weight: 500;
+}
+
+.alternative-login {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #666;
+  
+  a {
+    color: #ec1c24;
+    text-decoration: none;
+    font-weight: 500;
+  }
+}
+
+// OTP Verification Styles
+.error-message {
+  margin: 16px 0;
+  
+  p {
+    color: var(--ion-color-danger);
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+// OTP input container
+.otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0 32px;
+  width: 100%;
+  max-width: 320px;
+  
+  ion-input {
+    width: 44px;
+    height: 54px;
+    --background: #f9f9f9;
+    --padding-start: 0;
+    --padding-end: 0;
+    --text-align: center;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    border: 1px solid #e0e0e0;
+    
+    &.ion-touched, &.ion-focused {
+      border: 2px solid #ec1c24;
+      --background: #ffffff;
+    }
+    
+    // Fix for native input alignment within ion-input
+    &::part(native) {
+      padding: 0;
+      text-align: center;
+    }
+  }
+}
+
+// OTP timer styles
+.otp-timer {
+  margin: 16px 0 24px;
+  padding: 10px 16px;
+  background-color: rgba(236, 28, 36, 0.05);
+  border-radius: 12px;
+  max-width: 280px;
+  
+  ion-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #ec1c24;
+    
+    ion-icon {
+      margin-left: 8px;
+      font-size: 18px;
+    }
+  }
+}
+
+// Verify button
+.verify-button {
+  --background: #ec1c24;
+  --color: white;
+  font-weight: bold;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 24px;
+  height: 52px;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(236, 28, 36, 0.2);
+  
+  ion-spinner {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// Resend code section
+.resend-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  
+  span {
+    color: var(--ion-color-medium);
+    margin-bottom: 8px;
+  }
+  
+  a {
+    color: #ec1c24;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 16px;
+    transition: background-color 0.3s;
+    
+    &:hover:not(.disabled) {
+      background-color: rgba(236, 28, 36, 0.1);
+    }
+    
+    &.disabled {
+      color: var(--ion-color-medium);
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Change number link
+.change-number {
+  margin-top: 16px;
+  
+  a {
+    color: var(--ion-color-medium);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 16px;
+    transition: background-color 0.3s;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+// User Details Form Styles
+.details-step {
+  .name-row {
+    display: flex;
+    gap: 12px;
+    
+    .first-name,
+    .last-name {
+      flex: 1;
+    }
+  }
+}

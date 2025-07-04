@@ -1,0 +1,49 @@
+/* Alexandria Font for Arabic */
+@font-face {
+  font-family: 'Alexandria';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/alexandria-regular-arabic.woff2') format('woff2'),
+       local('Alexandria Regular'), local('Alexandria-Regular');
+}
+
+@font-face {
+  font-family: 'Alexandria';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/alexandria-regular-arabic.woff2') format('woff2'),
+       local('Alexandria Medium'), local('Alexandria-Medium');
+}
+
+@font-face {
+  font-family: 'Alexandria';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/alexandria-semibold-arabic.woff2') format('woff2'),
+       local('Alexandria SemiBold'), local('Alexandria-SemiBold');
+}
+
+@font-face {
+  font-family: 'Alexandria';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/alexandria-bold-arabic.woff2') format('woff2'),
+       local('Alexandria Bold'), local('Alexandria-Bold');
+}
+
+/* Default font family for the entire app */
+:root {
+  --ion-font-family: 'Alexandria', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+/* Force Alexandria font on all elements */
+html, body, ion-app, ion-content, ion-item, ion-label, ion-button, 
+ion-title, ion-tab-button, ion-card, ion-card-title, ion-card-subtitle,
+ion-card-content, ion-toolbar, ion-header, ion-footer, ion-menu,
+ion-list, ion-list-header, ion-note, ion-text, h1, h2, h3, h4, h5, h6, p, span, div {
+  font-family: 'Alexandria', 'Roboto', 'Helvetica Neue', sans-serif !important;
+}
