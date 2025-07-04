@@ -41,6 +41,22 @@
 						"namedChunks": true
 					},
 					"configurations": {
+						"development": {
+							"fileReplacements": [
+								{
+									"replace": "src/environments/environment.ts",
+									"with": "src/environments/environment.development.ts"
+								}
+							],
+							"optimization": false,
+							"outputHashing": "none",
+							"sourceMap": true,
+							"namedChunks": true,
+							"aot": false,
+							"extractLicenses": false,
+							"vendorChunk": true,
+							"buildOptimizer": false
+						},
 						"production": {
 							"fileReplacements": [
 								{
