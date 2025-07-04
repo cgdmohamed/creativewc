@@ -33,6 +33,60 @@ import { AppConfig } from '../../interfaces/config.interface';
               <ion-label position="stacked">Store Description</ion-label>
               <ion-textarea [(ngModel)]="config.storeDescription" (ionBlur)="updateConfig()"></ion-textarea>
             </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Store URL</ion-label>
+              <ion-input [(ngModel)]="config.storeUrl" (ionBlur)="updateConfig()"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">WordPress URL</ion-label>
+              <ion-input [(ngModel)]="config.wordpressUrl" (ionBlur)="updateConfig()"></ion-input>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Theme Configuration -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Theme Configuration</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="stacked">Primary Color</ion-label>
+              <ion-input type="color" [(ngModel)]="config.theme.primaryColor" (ionChange)="updateTheme()"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Secondary Color</ion-label>
+              <ion-input type="color" [(ngModel)]="config.theme.secondaryColor" (ionChange)="updateTheme()"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox [(ngModel)]="config.theme.darkMode" (ionChange)="updateTheme()"></ion-checkbox>
+              <ion-label>Dark Mode</ion-label>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Payment Methods -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Payment Methods</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-checkbox [(ngModel)]="paymentGateways.cod" (ionChange)="updatePaymentGateways()"></ion-checkbox>
+              <ion-label>Cash on Delivery</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox [(ngModel)]="paymentGateways.stripe" (ionChange)="updatePaymentGateways()"></ion-checkbox>
+              <ion-label>Stripe</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox [(ngModel)]="paymentGateways.paypal" (ionChange)="updatePaymentGateways()"></ion-checkbox>
+              <ion-label>PayPal</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox [(ngModel)]="paymentGateways.moyasar" (ionChange)="updatePaymentGateways()"></ion-checkbox>
+              <ion-label>Moyasar</ion-label>
+            </ion-item>
           </ion-card-content>
         </ion-card>
 
@@ -215,6 +269,31 @@ export class ConfigManagerComponent implements OnInit {
   }
 
   async loadConfig() {
+    this.config = this.configService.getConfig();
+    if (this.config.paymentMethods) {
+      this.paymentGateways = { ...this.config.paymentMethods };
+    }
+  }
+
+  updateConfig() {
+    this.configService.updateConfig(this.config);
+    this.showToast('Configuration updated', 'success');
+  }
+
+  updateTheme() {
+    this.configService.updateTheme(this.config.theme);
+    this.showToast('Theme updated', 'success');
+  }
+
+  updatePaymentGateways() {
+    this.configService.updateConfig({ 
+      paymentMethods: this.paymentGateways,
+      enabledPaymentGateways: Object.keys(this.paymentGateways).filter(key => this.paymentGateways[key])
+    });
+    this.showToast('Payment gateways updated', 'success');ig();
+  }
+
+  async loadConfig() {
     try {
       await this.configService.waitForConfig();
       this.config = { ...this.configService.getConfig() };
@@ -283,7 +362,7 @@ export class ConfigManagerComponent implements OnInit {
         reader.readAsText(file);
       }
     };
-    input.click();
+    input.click();ck();
   }
 
   async resetConfig() {
@@ -326,5 +405,6 @@ export class ConfigManagerComponent implements OnInit {
       color
     });
     await toast.present();
+  }();
   }
 }

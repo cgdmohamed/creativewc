@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
-import { ConfigManagerComponent } from '../../components/config-manager/config-manager.component';
+import { ModalController, AlertController } from '@ionic/angular';
 import { ConfigService } from '../../services/config.service';
 import { ThemeService } from '../../services/theme.service';
+import { LanguageService } from '../../services/language.service';
+import { ConfigManagerComponent } from '../../components/config-manager/config-manager.component';
 
 @Component({
   selector: 'app-settings',
@@ -77,7 +78,9 @@ export class SettingsPage implements OnInit {
   constructor(
     private modalController: ModalController,
     private configService: ConfigService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private languageService: LanguageService,
+    private alertController: AlertController,
   ) {}
 
   async ngOnInit() {

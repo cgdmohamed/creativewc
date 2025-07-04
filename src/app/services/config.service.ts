@@ -292,6 +292,115 @@ export class ConfigService {
   }
 
   /**
+   * Get current configuration
+   */
+  getConfig(): AppConfig {
+    return this.config;
+  }
+
+  /**
+   * Wait for configuration to load
+   */
+  async waitForConfig(): Promise<AppConfig> {
+    if (this.configLoaded) {
+      return this.config;
+    }
+
+    return new Promise((resolve) => {
+      const subscription = this.configSubject.subscribe((config) => {
+        if (config && this.configLoaded) {
+          subscription.unsubscribe();
+          resolve(config);
+        }
+      });
+    });
+  }
+
+  /**
+   * Save configuration to localStorage
+   */
+  private saveConfig(): void {
+    localStorage.setItem('app-config', JSON.stringify(this.config));
+  }
+
+  /**
+   * Get default configuration
+   */
+  private getDefaultConfig(): AppConfig {
+    return {
+      name: 'DARZN',
+      version: '1.0.0',
+      apiUrl: 'wp-json/wc/v3',
+      storeUrl: 'your-store.com',
+      consumerKey: 'your-consumer-key',
+      consumerSecret: 'your-consumer-secret',
+      wordpressUrl: 'https://your-store.com',
+      authCode: 'your-auth-code',
+      oneSignalAppId: 'your-onesignal-app-id',
+      useDemoData: false,
+      enabledPaymentGateways: ['cod'],
+      storeDescription: 'Your Store Description',
+      supportedLanguages: ['en', 'ar'],
+      theme: {
+        primaryColor: '#ec1c24',
+        secondaryColor: '#003566',
+        darkMode: false
+      },
+      features: {
+        enablePushNotifications: true,
+        enableOtp: true,
+        enableWishlist: true,
+        enableReviews: true
+      },
+      paymentMethods: {
+        cod: true,
+        stripe: false,
+        paypal: false,
+        moyasar: false
+      }
+    };
+  }
+
+  /**
+   * Export configuration as JSON string
+   */
+  exportConfig(): string {
+    return JSON.stringify(this.config, null, 2);
+  }
+
+  /**
+   * Import configuration from JSON string
+   */
+  importConfig(jsonString: string): { success: boolean; message: string } {
+    try {
+      const newConfig = JSON.parse(jsonString);
+      this.updateConfig(newConfig);
+      return { success: true, message: 'Configuration imported successfully' };
+    } catch (error) {
+      return { success: false, message: 'Invalid JSON format' };
+    }
+  }
+
+  /**
+   * Reset configuration to defaults
+   */
+  async resetConfig(): Promise<void> {
+    this.config = this.getDefaultConfig();
+    this.saveConfig();
+    this.configSubject.next(this.config);
+    this.syncThemeWithThemeService(this.config.theme);
+  }
+
+  /**
+   * Reload configuration from file
+   */
+  async reloadConfig(): Promise<void> {
+    localStorage.removeItem('app-config');
+    this.configLoaded = false;
+    await this.loadConfig();
+  }
+
+  /**
    * Save configuration to localStorage
    */
   saveConfig(): void {
