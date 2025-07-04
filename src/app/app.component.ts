@@ -16,6 +16,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { environment } from "../environments/environment";
 import { LanguageService } from "./services/language.service";
 import { TranslateService } from "@ngx-translate/core";
+import { ConfigService } from "./services/config.service";
 
 // Define window with OneSignal for TypeScript
 declare global {

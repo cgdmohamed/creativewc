@@ -6,6 +6,7 @@ export interface ThemeConfig {
   isRTL: boolean;
   darkMode: boolean;
   primaryColor: string;
+  secondaryColor?: string;
   textSize: string;
 }
 
