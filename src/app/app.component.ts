@@ -14,9 +14,11 @@ import { WishlistService } from "./services/wishlist.service";
 import { ConnectivityTesterService } from "./services/connectivity-tester.service";
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { environment } from "../environments/environment";
+import { ConfigService } from "./services/config.service";
+import { ConfigUsageService } from './services/config-usage.service';
 import { LanguageService } from "./services/language.service";
 import { TranslateService } from "@ngx-translate/core";
-import { ConfigService } from "./services/config.service";
+
 
 // Define window with OneSignal for TypeScript
 declare global {
@@ -56,7 +58,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private alertController: AlertController,
     public languageService: LanguageService, // Language service for internationalization
     private translate: TranslateService, // Translation service
-    private configService: ConfigService // Add ConfigService
+    private configService: ConfigService, // Add ConfigService
+    private configUsageService: ConfigUsageService // Inject ConfigUsageService
   ) {
     // Initialize storage first
     this.storage.create().then(() => {
@@ -95,12 +98,12 @@ export class AppComponent implements OnInit, OnDestroy {
     try {
       this.config = await this.configService.waitForConfig();
       console.log('Configuration loaded successfully');
-      
+
       // Initialize other services with config
       await this.initializeLanguage();
       await this.initializeTheme();
       this.setAppMetadata();
-      
+
     } catch (error) {
       console.error('Error loading configuration:', error);
     }
@@ -175,12 +178,12 @@ export class AppComponent implements OnInit, OnDestroy {
     try {
       // Make sure we have the secret key
       const appId = environment.oneSignalAppId || '';
-    
+
       if (!window.OneSignal || !appId) {
         console.warn('OneSignal not available or app ID missing');
         return;
       }
-      
+
       if (typeof window !== 'undefined' && window.OneSignal && this.config?.notifications?.oneSignalAppId) {
         window.OneSignal.init({
           appId: this.config.notifications.oneSignalAppId,
@@ -408,28 +411,62 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private setAppMetadata() {
     try {
-      // Set document title
+      // Set document title using app name
       if (this.config?.appName) {
         document.title = this.config.appName;
       }
 
-      // Set meta description
+      // Set meta description using store description
       if (this.config?.storeDescription) {
-        let metaDescription = document.querySelector('meta[name="description"]');
-        if (!metaDescription) {
-          metaDescription = document.createElement('meta');
-          metaDescription.setAttribute('name', 'description');
-          document.head.appendChild(metaDescription);
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+          metaDescription.setAttribute('content', this.config.storeDescription);
+        } else {
+          const meta = document.createElement('meta');
+          meta.name = 'description';
+          meta.content = this.config.storeDescription;
+          document.head.appendChild(meta);
         }
-        metaDescription.setAttribute('content', this.config.storeDescription);
       }
 
-      // Set viewport for RTL support if enabled
-      if (this.config?.features?.enableRtl) {
-        const viewport = document.querySelector('meta[name="viewport"]');
-        if (viewport && this.languageService.isRTL()) {
-          document.documentElement.dir = 'rtl';
+      // Set app slogan as meta tag
+      if (this.config?.appSlogan) {
+        const metaSlogan = document.querySelector('meta[name="slogan"]');
+        if (metaSlogan) {
+          metaSlogan.setAttribute('content', this.config.appSlogan);
+        } else {
+          const meta = document.createElement('meta');
+          meta.name = 'slogan';
+          meta.content = this.config.appSlogan;
+          document.head.appendChild(meta);
         }
+      }
+
+      // Set favicon using logo URL
+      if (this.config?.logoUrl) {
+        const link = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+        if (link) {
+          link.href = this.config.logoUrl;
+        }
+      }
+
+      // Set app version as meta tag
+      if (this.config?.version) {
+        const metaVersion = document.querySelector('meta[name="version"]');
+        if (metaVersion) {
+          metaVersion.setAttribute('content', this.config.version);
+        } else {
+          const meta = document.createElement('meta');
+          meta.name = 'version';
+          meta.content = this.config.version;
+          document.head.appendChild(meta);
+        }
+      }
+
+      // Set viewport meta tag with proper scaling
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
       }
     } catch (error) {
       console.error('Error setting app metadata:', error);

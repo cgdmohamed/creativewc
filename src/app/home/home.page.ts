@@ -26,9 +26,21 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   onSaleProducts: Product[] = [];
   categories: Category[] = [];
   isLoading = true;
+  currentLanguage: string = 'en';
   cartItemCount = 0;
-  unreadNotificationCount = 0;
-  private cartSubscription: Subscription;
+  cartSubscription: Subscription;
+  defaultCurrency: string = 'USD';
+  featuresEnabled: {
+    wishlist: boolean;
+    reviews: boolean;
+    recommendations: boolean;
+    guestCheckout: boolean;
+  } = {
+    wishlist: true,
+    reviews: true,
+    recommendations: true,
+    guestCheckout: true
+  };
   private wishlistSubscription: Subscription;
   private notificationSubscription: Subscription;
 
@@ -851,177 +863,59 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  // This was moved to the end of the file to avoid duplication
+  async ngOnInit() {
+    this.isLoading = true;
 
-  // Load real products when a specific API call fails
-  private loadDemoProducts(type: 'featured' | 'new' | 'sale'): void {
-    // First try to get random products from the API using our improved method
-    this.productService.getRandomProducts(10).subscribe(randomProducts => {
-      console.log(`Got ${randomProducts.length} random products from API for ${type}`);
+    try {
+      // Load configuration
+      this.config = await this.configService.waitForConfig();
+      this.appName = this.config.app?.appName || 'DRZN Shopping';
+      this.appSlogan = this.config.app?.appSlogan || 'Shop smarter, not harder';
+      this.storeDescription = this.config.app?.storeDescription || 'Your premier shopping destination';
+    } catch (error) {
+      console.error('Error loading home data:', error);
+    } finally {
+      this.isLoading = false;
+    }
+    this.initializeHomePage();
+    this.loadAppConfiguration();
+  }
 
-      if (randomProducts.length >= 5) {
-        // We have enough products, use them
-        if (type === 'featured') {
-          this.featuredProducts = randomProducts.slice(0, 5);
-        } else if (type === 'new') {
-          this.newProducts = randomProducts.slice(0, 5);
-        } else if (type === 'sale') {
-          this.onSaleProducts = randomProducts.slice(0, 5);
+  private loadAppConfiguration(): void {
+    this.configService.config$.subscribe(config => {
+      if (config) {
+        // Update page title with app name
+        if (config.appName) {
+          document.title = config.appName;
         }
-        console.log(`Used ${randomProducts.slice(0, 5).length} random API products for ${type}`);
-      } else {
-        // Not enough real random products, try products from other categories
-        this.tryOtherCategoryProductsBeforeFallback(type, randomProducts);
+
+        // Apply theme configuration
+        if (config.theme) {
+          this.applyThemeConfig(config.theme);
+        }
+
+        // Set currency display based on regional settings
+        if (config.regional?.defaultCurrency) {
+          this.defaultCurrency = config.regional.defaultCurrency;
+        }
+
+        // Enable/disable features based on configuration
+        this.featuresEnabled = {
+          wishlist: config.features?.enableWishlist || false,
+          reviews: config.features?.enableReviews || false,
+          recommendations: config.features?.enableRecommendations || false,
+          guestCheckout: config.features?.enableGuestCheckout || false
+        };
       }
-    }, error => {
-      // If API call fails, try other API categories
-      console.error(`Error fetching random products for ${type}:`, error);
-      this.tryOtherCategoryProductsBeforeFallback(type, []);
     });
   }
 
-  // Try to get products from other categories before falling back to demo
-  private tryOtherCategoryProductsBeforeFallback(type: 'featured' | 'new' | 'sale', existingProducts: Product[]): void {
-    // Use a different category than the one that failed
-    let otherType: 'featured' | 'new' | 'sale';
-    if (type === 'featured') {
-      otherType = 'new';
-    } else if (type === 'new') {
-      otherType = 'sale';
-    } else {
-      otherType = 'featured';
+  private applyThemeConfig(theme: any): void {
+    if (theme.primaryColor) {
+      document.documentElement.style.setProperty('--ion-color-primary', theme.primaryColor);
     }
-
-    console.log(`Trying ${otherType} products as replacements for ${type}`);
-
-    // Try to get products from another category
-    if (otherType === 'featured') {
-      this.productService.getFeaturedProducts(10).subscribe(
-        otherProducts => {
-          if (otherProducts.length > 0) {
-            // We have some products, use them
-            const productsToUse = [...existingProducts, ...otherProducts].slice(0, 5);
-
-            if (type === 'featured') {
-              this.featuredProducts = productsToUse;
-            } else if (type === 'new') {
-              this.newProducts = productsToUse;
-            } else if (type === 'sale') {
-              this.onSaleProducts = productsToUse;
-            }
-
-            console.log(`Used ${productsToUse.length} products from other categories for ${type}`);
-          } else {
-            // Still not enough, fall back to demo
-            this.finalFallbackToDemoProducts(type, existingProducts);
-          }
-        },
-        error => this.finalFallbackToDemoProducts(type, existingProducts)
-      );
-    } else if (otherType === 'new') {
-      this.productService.getNewProducts().subscribe(
-        otherProducts => {
-          if (otherProducts.length > 0) {
-            // We have some products, use them
-            const productsToUse = [...existingProducts, ...otherProducts].slice(0, 5);
-
-            if (type === 'featured') {
-              this.featuredProducts = productsToUse;
-            } else if (type === 'new') {
-              this.newProducts = productsToUse;
-            } else if (type === 'sale') {
-              this.onSaleProducts = productsToUse;
-            }
-
-            console.log(`Used ${productsToUse.length} products from other categories for ${type}`);
-          } else {
-            // Still not enough, fall back to demo
-            this.finalFallbackToDemoProducts(type, existingProducts);
-          }
-        },
-        error => this.finalFallbackToDemoProducts(type, existingProducts)
-      );
-    } else if (otherType === 'sale') {
-      this.productService.getOnSaleProducts().subscribe(
-        otherProducts => {
-          if (otherProducts.length > 0) {
-            // We have some products, use them
-            const productsToUse = [...existingProducts, ...otherProducts].slice(0, 5);
-
-            if (type === 'featured') {
-              this.featuredProducts = productsToUse;
-            } else if (type === 'new') {
-              this.newProducts = productsToUse;
-            } else if (type === 'sale') {
-              this.onSaleProducts = productsToUse;
-            }
-
-            console.log(`Used ${productsToUse.length} products from other categories for ${type}`);
-          } else {
-            // Still not enough, fall back to demo
-            this.finalFallbackToDemoProducts(type, existingProducts);
-          }
-        },
-        error => this.finalFallbackToDemoProducts(type, existingProducts)
-      );
-    }
-  }
-
-  // Fallback to demo products when API doesn't provide enough products
-  private finalFallbackToDemoProducts(type: 'featured' | 'new' | 'sale', existingProducts: Product[]): void {
-    // Never use demo products in production mode
-    if (environment.production) {
-      console.log(`In production mode - not using demo products for ${type} section`);
-      if (type === 'featured') {
-        this.featuredProducts = existingProducts;
-      } else if (type === 'new') {
-        this.newProducts = existingProducts;
-      } else if (type === 'sale') {
-        this.onSaleProducts = existingProducts;
-      }
-      return;
-    }
-
-    const mockDataService = this.productService['mockDataService'];
-
-    if (type === 'featured') {
-      mockDataService.getFeaturedProducts().subscribe(demoProducts => {
-        // If we already have some products, only add what we need to reach 5
-        if (existingProducts.length > 0) {
-          const neededCount = 5 - existingProducts.length;
-          const productsToAdd = demoProducts.slice(0, neededCount);
-          this.featuredProducts = [...existingProducts, ...productsToAdd];
-          console.log(`Added ${productsToAdd.length} demo products to ${existingProducts.length} API products for ${type}`);
-        } else {
-          // Otherwise use all demo products
-          this.featuredProducts = demoProducts.slice(0, 5);
-          console.log(`Loaded ${this.featuredProducts.length} demo featured products as complete fallback`);
-        }
-      });
-    } else if (type === 'new') {
-      mockDataService.getNewProducts().subscribe(demoProducts => {
-        if (existingProducts.length > 0) {
-          const neededCount = 5 - existingProducts.length;
-          const productsToAdd = demoProducts.slice(0, neededCount);
-          this.newProducts = [...existingProducts, ...productsToAdd];
-          console.log(`Added ${productsToAdd.length} demo products to ${existingProducts.length} API products for ${type}`);
-        } else {
-          this.newProducts = demoProducts.slice(0, 5);
-          console.log(`Loaded ${this.newProducts.length} demo new products as complete fallback`);
-        }
-      });
-    } else if (type === 'sale') {
-      mockDataService.getOnSaleProducts().subscribe(demoProducts => {
-        if (existingProducts.length > 0) {
-          const neededCount = 5 - existingProducts.length;
-          const productsToAdd = demoProducts.slice(0, neededCount);
-          this.onSaleProducts = [...existingProducts, ...productsToAdd];
-          console.log(`Added ${productsToAdd.length} demo products to ${existingProducts.length} API products for ${type}`);
-        } else {
-          this.onSaleProducts = demoProducts.slice(0, 5);
-          console.log(`Loaded ${this.onSaleProducts.length} demo sale products as complete fallback`);
-        }
-      });
+    if (theme.secondaryColor) {
+      document.documentElement.style.setProperty('--ion-color-secondary', theme.secondaryColor);
     }
   }
 }

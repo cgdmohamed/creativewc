@@ -36,7 +36,7 @@ export class LanguageService {
   constructor(
     private translate: TranslateService,
     private storage: Storage,
-    private configService: AppConfigService // Inject the config service
+    private configService: AppConfigService
   ) {}
 
   /**

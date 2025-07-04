@@ -75,6 +75,12 @@
     <!-- Main content -->
     <div class="ion-page" id="main-content">
       <ion-router-outlet></ion-router-outlet>
+  
+  <!-- App configuration loaded indicator -->
+  <div *ngIf="!config" class="config-loading">
+    <ion-spinner></ion-spinner>
+    <p>Loading app configuration...</p>
+  </div>
 
       <!-- Bottom Tab Bar - Only shown on non-auth pages -->
       <app-tabs *ngIf="showMenu"></app-tabs>
