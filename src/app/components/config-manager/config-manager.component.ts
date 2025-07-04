@@ -1,9 +1,4 @@
-` tags.
 
-Here's the combined code:
-
-```
-<replit_final_file>
 import { Component, OnInit } from '@angular/core';
 import { ToastController, AlertController } from '@ionic/angular';
 import { ConfigService } from '../../services/config.service';
