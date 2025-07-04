@@ -106,7 +106,7 @@ export interface AppConfig {
 
   
   // SMS Provider configurations
-  TwilioConfig?: TwilioConfig;
+  twilioConfig?: TwilioConfig;
   firebaseConfig?: FirebaseConfig;
   messageBirdConfig?: MessageBirdConfig;
   vonageConfig?: VonageConfig;

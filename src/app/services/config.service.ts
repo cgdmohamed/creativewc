@@ -149,7 +149,7 @@ export class ConfigService {
       // SMS Provider Configuration
       smsProviders: ['twilio'],
       defaultSmsProvider: 'twilio',
-      TwilioConfig: {
+      twilioConfig: {
         accountSid: '',
         authToken: '',
         phoneNumber: '',
