@@ -88,12 +88,20 @@ export class ConfigUsageService {
   }
 
   private validateStoreConfig(): void {
-    if (!this.config.store) {
+    if (!this.config.storeUrl && !this.config.store) {
       console.warn('⚠️ Store configuration missing');
       return;
     }
     
-    const store = this.config.store;
+    const store = this.config.store || {
+      storeUrl: this.config.storeUrl,
+      apiUrl: this.config.apiUrl,
+      wordpressUrl: this.config.wordpressUrl,
+      consumerKey: this.config.consumerKey,
+      consumerSecret: this.config.consumerSecret,
+      authCode: this.config.authCode,
+      jwtAuthUrl: this.config.jwtAuthUrl
+    };
     console.log('🏪 Store Config:', {
       storeUrl: store.storeUrl || 'Not set',
       apiUrl: store.apiUrl || 'Not set',
@@ -127,12 +135,21 @@ export class ConfigUsageService {
   }
 
   private validateRegionalConfig(): void {
-    if (!this.config.regional) {
+    if (!this.config.defaultCurrency && !this.config.regional) {
       console.warn('⚠️ Regional configuration missing');
       return;
     }
     
-    const regional = this.config.regional;
+    const regional = this.config.regional || {
+      defaultCurrency: this.config.defaultCurrency,
+      defaultLanguage: this.config.defaultLanguage,
+      supportedLanguages: this.config.supportedLanguages,
+      countryCode: this.config.countryCode,
+      timezone: this.config.timezone,
+      dateFormat: this.config.dateFormat,
+      taxRate: this.config.taxRate,
+      shippingEnabled: this.config.shippingEnabled
+    };
     console.log('🌍 Regional Config:', {
       defaultCurrency: regional.defaultCurrency || 'USD',
       defaultLanguage: regional.defaultLanguage || 'en',
@@ -237,12 +254,12 @@ export class ConfigUsageService {
   }
 
   private validateSecurityConfig(): void {
-    if (!this.config.security) {
-      console.warn('⚠️ Security configuration missing');
+    const security = this.config.security;
+    if (!security) {
+      console.warn('⚠️ Security configuration missing - using defaults');
+      console.log('🔒 Security Config: Using default security settings');
       return;
     }
-    
-    const security = this.config.security;
     console.log('🔒 Security Config:', {
       enableCsrf: security.enableCsrf,
       enableRateLimit: security.enableRateLimit,
@@ -252,12 +269,12 @@ export class ConfigUsageService {
   }
 
   private validatePerformanceConfig(): void {
-    if (!this.config.performance) {
-      console.warn('⚠️ Performance configuration missing');
+    const performance = this.config.performance;
+    if (!performance) {
+      console.warn('⚠️ Performance configuration missing - using defaults');
+      console.log('⚡ Performance Config: Using default performance settings');
       return;
     }
-    
-    const performance = this.config.performance;
     console.log('⚡ Performance Config:', {
       enableCaching: performance.enableCaching,
       cacheTimeout: performance.cacheTimeout,
@@ -267,12 +284,12 @@ export class ConfigUsageService {
   }
 
   private validateAnalyticsConfig(): void {
-    if (!this.config.analytics) {
-      console.warn('⚠️ Analytics configuration missing');
+    const analytics = this.config.analytics;
+    if (!analytics) {
+      console.warn('⚠️ Analytics configuration missing - using defaults');
+      console.log('📊 Analytics Config: Using default analytics settings');
       return;
     }
-    
-    const analytics = this.config.analytics;
     console.log('📊 Analytics Config:', {
       enableGoogleAnalytics: analytics.enableGoogleAnalytics,
       googleAnalyticsId: analytics.googleAnalyticsId ? '***configured***' : 'not set',
