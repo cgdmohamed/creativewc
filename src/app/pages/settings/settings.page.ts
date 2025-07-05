@@ -4,6 +4,7 @@ import { ToastController, AlertController } from '@ionic/angular';
 import { ConfigService } from '../../services/config.service';
 import { ThemeService } from '../../services/theme.service';
 import { LanguageService } from '../../services/language.service';
+import { RegionalService } from '../../services/regional.service';
 
 @Component({
   selector: 'app-settings',
@@ -324,7 +325,8 @@ export class SettingsPage implements OnInit {
     private alertController: AlertController,
     private configService: ConfigService,
     private themeService: ThemeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private regionalService: RegionalService
   ) {}
 
   ngOnInit() {
@@ -415,92 +417,42 @@ export class SettingsPage implements OnInit {
 
   getCurrentCurrencyDisplay(): string {
     const currency = this.config?.regional?.defaultCurrency || 'USD';
-    const currencyNames: { [key: string]: string } = {
-      'USD': 'US Dollar ($)',
-      'EUR': 'Euro (€)',
-      'GBP': 'British Pound (£)',
-      'SAR': 'Saudi Riyal (ر.س)',
-      'AED': 'UAE Dirham (د.إ)',
-      'QAR': 'Qatari Riyal (ر.ق)',
-      'KWD': 'Kuwaiti Dinar (د.ك)',
-      'BHD': 'Bahraini Dinar (د.ب)',
-      'OMR': 'Omani Rial (ر.ع)',
-      'JOD': 'Jordanian Dinar (د.أ)',
-      'EGP': 'Egyptian Pound (ج.م)'
-    };
-    return currencyNames[currency] || currency;
+    const currencyInfo = this.regionalService.getCurrencyInfo(currency);
+    return `${currencyInfo.name} (${currencyInfo.symbol})`;
   }
 
   getCurrentRegionDisplay(): string {
-    const countryCode = this.config?.regional?.countryCode || 'US';
-    const countryNames: { [key: string]: string } = {
-      'US': 'United States',
-      'SA': 'Saudi Arabia',
-      'AE': 'United Arab Emirates',
-      'QA': 'Qatar',
-      'KW': 'Kuwait',
-      'BH': 'Bahrain',
-      'OM': 'Oman',
-      'JO': 'Jordan',
-      'EG': 'Egypt',
-      'GB': 'United Kingdom',
-      'DE': 'Germany',
-      'FR': 'France',
-      'ES': 'Spain'
-    };
-    return countryNames[countryCode] || countryCode;
+    const currentRegion = this.regionalService.getCurrentRegion();
+    return currentRegion?.country || 'Unknown';
   }
 
   getSampleDate(): string {
     const sampleDate = new Date(2024, 0, 15); // January 15, 2024
-    const dateFormat = this.config?.regional?.dateFormat || 'MM/dd/yyyy';
-    
-    try {
-      if (dateFormat === 'MM/dd/yyyy') {
-        return '01/15/2024';
-      } else if (dateFormat === 'dd/MM/yyyy') {
-        return '15/01/2024';
-      } else if (dateFormat === 'dd.MM.yyyy') {
-        return '15.01.2024';
-      } else {
-        return sampleDate.toLocaleDateString();
-      }
-    } catch (error) {
-      return '01/15/2024';
-    }
+    return this.regionalService.formatDate(sampleDate);
   }
 
   getTaxRateDisplay(): string {
-    const taxRate = this.config?.regional?.taxRate || 0;
+    const regionalConfig = this.regionalService.getCurrentRegionalConfig();
+    const taxRate = regionalConfig?.taxRate || 0;
     return (taxRate * 100).toFixed(1);
   }
 
   getTextDirectionDisplay(): string {
     const isRtl = this.languageService.isRTL();
-    return isRtl ? 'Right to Left (RTL)' : 'Left to Right (LTR)';
+    const isRegionRtl = this.regionalService.isCurrentRegionRtl();
+    return isRtl || isRegionRtl ? 'Right to Left (RTL)' : 'Left to Right (LTR)';
   }
 
   async changeCurrency(): Promise<void> {
-    const currencies = [
-      { code: 'USD', name: 'US Dollar ($)' },
-      { code: 'EUR', name: 'Euro (€)' },
-      { code: 'GBP', name: 'British Pound (£)' },
-      { code: 'SAR', name: 'Saudi Riyal (ر.س)' },
-      { code: 'AED', name: 'UAE Dirham (د.إ)' },
-      { code: 'QAR', name: 'Qatari Riyal (ر.ق)' },
-      { code: 'KWD', name: 'Kuwaiti Dinar (د.ك)' },
-      { code: 'BHD', name: 'Bahraini Dinar (د.ب)' },
-      { code: 'OMR', name: 'Omani Rial (ر.ع)' },
-      { code: 'JOD', name: 'Jordanian Dinar (د.أ)' },
-      { code: 'EGP', name: 'Egyptian Pound (ج.م)' }
-    ];
+    const supportedCurrencies = this.regionalService.getSupportedCurrencies();
+    const currentCurrency = this.config?.regional?.defaultCurrency || 'USD';
 
-    const inputs = currencies.map(currency => ({
+    const inputs = supportedCurrencies.map(currency => ({
       name: 'currency',
       type: 'radio',
-      label: currency.name,
+      label: `${currency.name} (${currency.symbol})`,
       value: currency.code,
-      checked: (this.config?.regional?.defaultCurrency || 'USD') === currency.code
+      checked: currentCurrency === currency.code
     }));
 
     const alert = await this.alertController.create({
@@ -513,8 +465,14 @@ export class SettingsPage implements OnInit {
         },
         {
           text: 'OK',
-          handler: (currency: string) => {
-            this.updateRegionalConfig({ defaultCurrency: currency });
+          handler: async (currency: string) => {
+            await this.regionalService.updateRegionalSettings({ defaultCurrency: currency });
+            const toast = await this.toastController.create({
+              message: 'Currency updated successfully',
+              duration: 2000,
+              color: 'success'
+            });
+            await toast.present();
           }
         }
       ]
@@ -524,28 +482,19 @@ export class SettingsPage implements OnInit {
   }
 
   async changeRegion(): Promise<void> {
-    const regions = [
-      { code: 'US', name: 'United States' },
-      { code: 'SA', name: 'Saudi Arabia' },
-      { code: 'AE', name: 'United Arab Emirates' },
-      { code: 'QA', name: 'Qatar' },
-      { code: 'KW', name: 'Kuwait' },
-      { code: 'BH', name: 'Bahrain' },
-      { code: 'OM', name: 'Oman' },
-      { code: 'JO', name: 'Jordan' },
-      { code: 'EG', name: 'Egypt' },
-      { code: 'GB', name: 'United Kingdom' },
-      { code: 'DE', name: 'Germany' },
-      { code: 'FR', name: 'France' },
-      { code: 'ES', name: 'Spain' }
-    ];
+    const availableRegions = this.regionalService.getAvailableRegions();
+    const currentCountry = this.config?.regional?.countryCode || 'US';
 
-    const inputs = regions.map(region => ({
+    const inputs = availableRegions.map(region => ({
       name: 'region',
       type: 'radio',
-      label: region.name,
-      value: region.code,
-      checked: (this.config?.regional?.countryCode || 'US') === region.code
+      label: `${region.country} (${region.currency})`,
+      value: Object.keys(this.regionalService['regions']).find(key => 
+        this.regionalService['regions'][key].country === region.country
+      ),
+      checked: currentCountry === Object.keys(this.regionalService['regions']).find(key => 
+        this.regionalService['regions'][key].country === region.country
+      )
     }));
 
     const alert = await this.alertController.create({
@@ -558,8 +507,14 @@ export class SettingsPage implements OnInit {
         },
         {
           text: 'OK',
-          handler: (countryCode: string) => {
-            this.updateRegionalConfig({ countryCode });
+          handler: async (countryCode: string) => {
+            await this.regionalService.setRegion(countryCode);
+            const toast = await this.toastController.create({
+              message: 'Region updated successfully',
+              duration: 2000,
+              color: 'success'
+            });
+            await toast.present();
           }
         }
       ]
@@ -570,7 +525,14 @@ export class SettingsPage implements OnInit {
 
   async toggleShipping(event: any): Promise<void> {
     const shippingEnabled = event.detail.checked;
-    this.updateRegionalConfig({ shippingEnabled });
+    await this.regionalService.updateRegionalSettings({ shippingEnabled });
+    
+    const toast = await this.toastController.create({
+      message: `Shipping ${shippingEnabled ? 'enabled' : 'disabled'}`,
+      duration: 2000,
+      color: 'success'
+    });
+    await toast.present();
   }
 
   private updateRegionalConfig(updates: any): void {

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from './config.service';
 import { ThemeService } from './theme.service';
 import { LanguageService } from './language.service';
+import { RegionalService } from './regional.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,8 @@ export class ConfigUsageService {
   constructor(
     private configService: ConfigService,
     private themeService: ThemeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private regionalService: RegionalService
   ) {
     this.configService.getConfig$().subscribe(config => {
       if (config) {
@@ -154,6 +156,9 @@ export class ConfigUsageService {
 
     // Validate RTL/LTR language support
     this.validateLanguageDirectionSupport(regional);
+    
+    // Test regional service integration
+    this.validateRegionalServiceIntegration();
   }
 
   private validateLanguageDirectionSupport(regional: any): void {
@@ -273,6 +278,42 @@ export class ConfigUsageService {
       googleAnalyticsId: analytics.googleAnalyticsId ? '***configured***' : 'not set',
       enableFacebookPixel: analytics.enableFacebookPixel,
       facebookPixelId: analytics.facebookPixelId ? '***configured***' : 'not set'
+    });
+  }
+
+  private validateRegionalServiceIntegration(): void {
+    const currentRegion = this.regionalService.getCurrentRegion();
+    const regionalConfig = this.regionalService.getCurrentRegionalConfig();
+    
+    console.log('🏛️ Regional Service Integration:', {
+      currentRegion: currentRegion?.country || 'Not set',
+      currentCurrency: regionalConfig?.defaultCurrency || 'Not set',
+      currentLanguage: regionalConfig?.defaultLanguage || 'Not set',
+      isRtlRegion: this.regionalService.isCurrentRegionRtl(),
+      shippingEnabled: this.regionalService.isShippingEnabled(),
+      timezone: this.regionalService.getTimezone(),
+      availableRegions: this.regionalService.getAvailableRegions().map(r => r.country),
+      supportedCurrencies: this.regionalService.getSupportedCurrencies().map(c => c.code)
+    });
+
+    // Test currency formatting
+    if (regionalConfig?.defaultCurrency) {
+      const testAmount = 123.45;
+      const formattedCurrency = this.regionalService.formatCurrency(testAmount);
+      console.log('💰 Currency Formatting Test:', {
+        amount: testAmount,
+        formatted: formattedCurrency,
+        currency: regionalConfig.defaultCurrency
+      });
+    }
+
+    // Test date formatting
+    const testDate = new Date(2024, 0, 15);
+    const formattedDate = this.regionalService.formatDate(testDate);
+    console.log('📅 Date Formatting Test:', {
+      date: testDate.toISOString(),
+      formatted: formattedDate,
+      format: regionalConfig?.dateFormat || 'Default'
     });
   }
 
