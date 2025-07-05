@@ -20,7 +20,7 @@ export class ConnectivityTesterService {
                     this.platform.is('capacitor') || 
                     this.platform.is('cordova');
     this.isProduction = environment.production;
-    
+
     console.log(`ConnectivityTesterService initialized. Mobile: ${this.isMobile}, Production: ${this.isProduction}`);
   }
 
@@ -33,28 +33,21 @@ export class ConnectivityTesterService {
       console.log('Mobile environment: Assuming WooCommerce API is accessible');
       return of({ success: true, message: 'WooCommerce API is accessible (assumed in mobile)' });
     }
-    
+
     // Use minimal headers to avoid CORS issues
     const headers = new HttpHeaders({
       'Cache-Control': 'no-cache',
       'Pragma': 'no-cache'
     });
 
-    let url: string;
-
-    if (this.isProduction) {
-      // Use absolute URL for production
-      url = `https://${environment.storeUrl}/${environment.apiUrl}/products`;
-    } else {
-      // Use relative URL for web development
-      url = `/${environment.apiUrl}/products`;
-    }
+    // Always use the full API URL
+    let url = `https://${environment.storeUrl}/wp-json/wc/v3/products`;
 
     // Add the authentication parameters and limit to 1 product
     url += `?consumer_key=${environment.consumerKey}&consumer_secret=${environment.consumerSecret}&per_page=1`;
-    
+
     console.log(`Testing connectivity to WooCommerce API: ${url}`);
-    
+
     return this.http.get(url, { 
       headers,
       params: {
@@ -78,7 +71,7 @@ export class ConnectivityTesterService {
             message: 'WooCommerce API is reachable but returned an authentication error. Check your API keys.'
           });
         }
-        
+
         console.error('WooCommerce connectivity test failed:', error);
         return of({ 
           success: false, 
@@ -99,11 +92,11 @@ export class ConnectivityTesterService {
       console.log('Testing general connectivity: Assuming connection in mobile environment');
       return of({ success: true, message: 'Internet connection is available (assumed in mobile)' });
     } 
-    
+
     // For web browser testing only
     const url = 'https://www.google.com/generate_204';
     console.log(`Testing general connectivity using: ${url} (web only)`);
-    
+
     return this.http.get(url, { 
       responseType: 'text',
       headers: new HttpHeaders({
@@ -118,7 +111,7 @@ export class ConnectivityTesterService {
           console.log('Got 404 for favicon but server is reachable, considering connectivity successful');
           return of({ success: true, message: 'Internet connection is available (resource not found but server reachable)' });
         }
-        
+
         console.error('General connectivity test failed:', error);
         return of({ 
           success: false, 
@@ -138,13 +131,13 @@ export class ConnectivityTesterService {
       console.log('Mobile environment: Assuming domain is resolvable');
       return of({ success: true, message: `Domain ${environment.storeUrl} is accessible (assumed in mobile)` });
     }
-    
+
     const domain = environment.storeUrl;
     // Try to access the WooCommerce API directly with minimal headers
     const url = `https://${domain}/wp-json/wc/v3/system_status?consumer_key=${environment.consumerKey}&consumer_secret=${environment.consumerSecret}`;
-    
+
     console.log(`Testing domain resolution for: ${url}`);
-    
+
     return this.http.get(url, { 
       headers: new HttpHeaders({
         'Cache-Control': 'no-cache'
@@ -160,7 +153,7 @@ export class ConnectivityTesterService {
           console.log(`Got status ${error.status} from domain, considering domain resolution successful`);
           return of({ success: true, message: `Domain ${domain} is accessible (status: ${error.status})` });
         }
-        
+
         console.error(`Domain resolution test failed for ${domain}:`, error);
         return of({ 
           success: false, 
@@ -176,7 +169,7 @@ export class ConnectivityTesterService {
    */
   runAllTests(): Observable<any> {
     console.log('Running all connectivity tests...');
-    
+
     // For mobile devices, skip actual tests to avoid CORS issues
     if (this.isMobile) {
       console.log('Mobile environment: Skipping actual connectivity tests');
@@ -188,7 +181,7 @@ export class ConnectivityTesterService {
         message: 'All connectivity tests passed (assumed in mobile environment).'
       });
     }
-    
+
     // Begin with general internet connectivity test for web browsers
     return this.testGeneralConnectivity().pipe(
       switchMap(generalResult => {
@@ -202,9 +195,9 @@ export class ConnectivityTesterService {
             message: 'No internet connection available.'
           });
         }
-        
+
         console.log('General connectivity test passed, continuing with domain test.');
-        
+
         return this.testDomainResolution().pipe(
           switchMap(domainResult => {
             if (!domainResult.success) {
@@ -217,9 +210,9 @@ export class ConnectivityTesterService {
                 message: `Cannot resolve domain ${environment.storeUrl}`
               });
             }
-            
+
             console.log('Domain resolution test passed, continuing with WooCommerce test.');
-            
+
             return this.testWooCommerceConnectivity().pipe(
               map(wooCommerceResult => {
                 return {

@@ -40,27 +40,18 @@ export class WoocommerceService {
     // Detect if we're on a mobile device (Capacitor/Cordova)
     this.isMobile = this.platform.is('hybrid') || this.platform.is('capacitor') || this.platform.is('cordova');
 
-    // Use absolute URL for mobile apps, otherwise use the relative URL for web development
-    if (this.isMobile || this.isProduction) {
-      this.apiUrl = `https://${environment.storeUrl}/wp-json/wc/v3`;
-      console.log('WooCommerce service: Using full API URL for mobile/production:', this.apiUrl);
-    } else {
-      this.apiUrl = environment.apiUrl;
-      console.log('WooCommerce service: Using relative API URL for web development:', this.apiUrl);
-    }
+    // Always use the full API URL from environment
+    this.apiUrl = `https://${environment.storeUrl}/wp-json/wc/v3`;
+    console.log('WooCommerce service: Using API URL:', this.apiUrl);
 
     console.log('WooCommerce service initialized');
     console.log(`Running on ${this.isMobile ? 'MOBILE device' : 'WEB browser'}`);
+    console.log('Consumer Key:', this.consumerKey);
+    console.log('Consumer Secret:', this.consumerSecret ? '***configured***' : 'NOT SET');
 
-    // In production builds, always use real data unless explicitly enabled
-    if (this.isProduction) {
-      this.useDemo = false;
-      console.log('Production mode detected, forcing real API data (useDemo = false)');
-    } else {
-      // Force demo mode to be refreshed from environment settings
-      this.useDemo = environment.useDemoData;
-      console.log('Demo mode updated from environment:', this.useDemo);
-    }
+    // Force real API usage - disable demo mode
+    this.useDemo = false;
+    console.log('Demo mode DISABLED - forcing real API data');
   }
 
   /**

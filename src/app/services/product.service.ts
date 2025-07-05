@@ -18,34 +18,31 @@ export class ProductService {
   private apiUrl: string;
   private consumerKey = environment.consumerKey;
   private consumerSecret = environment.consumerSecret;
-  
+
   // Track product IDs that failed to load to avoid repeated API calls
   private failedProductIds = new Set<number>();
   private randomProductCache: Product[] = [];
-  
+
   // Flag to indicate if we're in production mode
   private isProduction = environment.production;
   private isMobile: boolean;
 
   constructor(
     private http: HttpClient,
-    private mockDataService: MockDataService,
     private platform: Platform,
     private httpHelper: HttpHelperService
   ) {
     // Detect if we're on a mobile device (Capacitor/Cordova)
     this.isMobile = this.platform.is('hybrid') || this.platform.is('capacitor') || this.platform.is('cordova');
-    
-    // Let the HttpHelperService handle URL construction
-    this.apiUrl = this.httpHelper.getWooCommerceUrl();
-    
-    console.log(`ProductService initialized in ${this.isProduction ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
+
+    // Always use the full API URL from environment
+    this.apiUrl = `https://${environment.storeUrl}/wp-json/wc/v3`;
+    console.log('Product service: Using API URL:', this.apiUrl);
+    console.log('Consumer Key:', this.consumerKey);
+    console.log('Consumer Secret:', this.consumerSecret ? '***configured***' : 'NOT SET');
+
+    console.log('Product service initialized');
     console.log(`Running on ${this.isMobile ? 'MOBILE device' : 'WEB browser'}`);
-    console.log(`ProductService useDemoData setting: ${environment.useDemoData}`);
-    
-    if (this.isProduction && environment.useDemoData) {
-      console.warn('WARNING: useDemoData is set to true in production environment. This should be false in production.');
-    }
   }
 
   // Get products with optional filtering
@@ -89,17 +86,17 @@ export class ProductService {
         })
       );
     }
-    
+
     // Connect to WooCommerce API using environment variables
     return this.http.get<Product>(
       `${this.apiUrl}/products/${id}?consumer_key=${this.consumerKey}&consumer_secret=${this.consumerSecret}`
     ).pipe(
       catchError(error => {
         console.error(`Error fetching product ID ${id} from API:`, error);
-        
+
         // Add this ID to the list of failed product IDs so we won't try again
         this.failedProductIds.add(id);
-        
+
         // Return a random product from API instead of demo
         console.log(`Getting random API product for failed ID: ${id}`);
         return this.getRandomProducts(1).pipe(
@@ -115,7 +112,7 @@ export class ProductService {
       })
     );
   }
-  
+
   // Last resort - generate a placeholder product from scratch with minimal info
   private generateProductFromScratch(id: number): Product {
     return {
@@ -197,21 +194,21 @@ export class ProductService {
       meta_data: []
     } as Product;
   }
-  
+
   // Get random real products from API
   getRandomProducts(count: number = 5): Observable<Product[]> {
     // Always try to get real products, even in demo environment
-    
+
     // Check cache first
     if (this.randomProductCache.length >= count) {
       console.log(`Got ${count} random products from cache`);
       return of(this.randomProductCache.slice(0, count));
     }
-    
+
     // Get a larger number of products to ensure we have enough 
     // even after filtering out potential duplicates
     const fetchCount = Math.max(30, count * 2);
-    
+
     // Try first with orderby=rand which is the preferred method
     return this.http.get<Product[]>(
       `${this.apiUrl}/products?consumer_key=${this.consumerKey}&consumer_secret=${this.consumerSecret}&per_page=${fetchCount}&orderby=rand&status=publish`
@@ -227,7 +224,7 @@ export class ProductService {
       }),
       catchError(error => {
         console.error(`Error fetching random products with orderby=rand:`, error);
-        
+
         // If rand fails, try getting products without the random ordering
         // Many WooCommerce implementations don't support orderby=rand
         return this.http.get<Product[]>(
@@ -246,14 +243,14 @@ export class ProductService {
           }),
           catchError(secondError => {
             console.error(`Error fetching any products from API:`, secondError);
-            
+
             // Check if we're in production mode
             if (environment.production) {
               // In production, return empty array instead of placeholder products
               console.log(`In production mode - not creating placeholder products`);
               return of([]);
             } 
-            
+
             // In development mode, create minimal placeholder products
             console.log(`Creating ${count} minimal placeholder products as last resort`);
             const placeholders: Product[] = [];
@@ -281,25 +278,25 @@ export class ProductService {
     const queryString = Object.keys(params)
       .map(key => `${key}=${encodeURIComponent(params[key])}`)
       .join('&');
-    
+
     console.log(`Fetching categories, page: ${params.page}, per_page: ${params.per_page}`);
-    
+
     return this.http.get<Category[]>(`${this.apiUrl}/products/categories?${queryString}`)
       .pipe(
         catchError(error => {
           console.error('Error fetching categories from API:', error);
-          
+
           // Check if it's a server connection error (502, 504, etc)
           if (error.status >= 500) {
             console.warn('Server connection error detected. API server may be unavailable.');
           }
-          
+
           if (environment.production) {
             // In production, don't create fallback categories
             console.log('In production mode - not creating fallback categories');
             return of([]);
           }
-          
+
           // Create minimum viable categories when API fails (development mode only)
           console.log('Creating minimal viable categories as API fallback');
           // Create default categories that most stores would have
@@ -325,35 +322,35 @@ export class ProductService {
       per_page: options.per_page || 20,
       page: options.page || 1
     };
-    
+
     // Apply optional filters if provided
     if (options.orderby) {
       params.orderby = options.orderby; // e.g., date, price, popularity
     }
-    
+
     if (options.order) {
       params.order = options.order; // asc or desc
     }
-    
+
     if (options.minPrice !== undefined && options.maxPrice !== undefined) {
       params.min_price = options.minPrice;
       params.max_price = options.maxPrice;
     }
-    
+
     if (options.onSale) {
       params.on_sale = true;
     }
-    
+
     if (options.inStock) {
       params.stock_status = 'instock';
     }
-    
+
     // Add brand filter if provided
     if (options.brands && options.brands.length > 0) {
       params.attribute = 'pa_brand'; // This is the brand attribute slug
       params.attribute_term = options.brands.join(','); // Comma-separated list of brand term IDs
     }
-    
+
     // Add any additional options provided
     for (const key in options) {
       if (options.hasOwnProperty(key) && 
@@ -361,17 +358,17 @@ export class ProductService {
         params[key] = options[key];
       }
     }
-    
+
     const queryString = Object.keys(params)
       .map(key => `${key}=${params[key]}`)
       .join('&');
-    
+
     return this.http.get<Product[]>(`${this.apiUrl}/products?${queryString}`, { observe: 'response' })
       .pipe(
         map(response => {
           const totalPages = response.headers.get('X-WP-TotalPages') ? 
             parseInt(response.headers.get('X-WP-TotalPages') || '1', 10) : 1;
-          
+
           return {
             products: response.body || [],
             totalPages: totalPages,
@@ -380,7 +377,7 @@ export class ProductService {
         }),
         catchError(error => {
           console.error(`Error fetching products for category ${categoryId} from API:`, error);
-          
+
           // Return random API products with pagination info
           return this.getRandomProducts(options.per_page || 20).pipe(
             map(products => ({
@@ -403,19 +400,19 @@ export class ProductService {
       per_page: per_page,
       page: page
     };
-    
+
     const queryString = Object.keys(params)
       .map(key => `${key}=${encodeURIComponent(params[key])}`)
       .join('&');
-    
+
     console.log(`Searching products with query "${query}", page: ${page}, per_page: ${per_page}`);
-    
+
     return this.http.get<Product[]>(`${this.apiUrl}/products?${queryString}`, { observe: 'response' })
       .pipe(
         map(response => {
           const totalPages = response.headers.get('X-WP-TotalPages') ? 
             parseInt(response.headers.get('X-WP-TotalPages') || '1', 10) : 1;
-          
+
           return {
             products: response.body || [],
             totalPages: totalPages,
@@ -424,7 +421,7 @@ export class ProductService {
         }),
         catchError(error => {
           console.error(`Error searching products with query "${query}" from API:`, error);
-          
+
           // Check if we're in production mode
           if (this.isProduction) {
             console.log(`Production mode: Not providing fallback data for search query "${query}"`);
@@ -434,7 +431,7 @@ export class ProductService {
               currentPage: page
             });
           }
-          
+
           // In development, return random products as search results
           return this.getRandomProducts(per_page).pipe(
             map(products => ({
@@ -468,18 +465,18 @@ export class ProductService {
       })
     );
   }
-  
+
   // Get products filtered by brand
   getProductsByBrands(brands: string[], limit: number = 20): Observable<Product[]> {
     if (!brands || brands.length === 0) {
       return of([]);
     }
-    
+
     // Create the attribute filter parameter
     // Format: attribute=pa_brand&attribute_term=123,456
     const attributeParam = 'pa_brand'; // This is the brand attribute slug
     const attributeTerms = brands.join(','); // Comma-separated list of brand term IDs
-    
+
     // Connect to WooCommerce API using environment variables
     return this.http.get<Product[]>(
       `${this.apiUrl}/products?consumer_key=${this.consumerKey}&consumer_secret=${this.consumerSecret}&attribute=${attributeParam}&attribute_term=${attributeTerms}&per_page=${limit}`
@@ -500,11 +497,11 @@ export class ProductService {
       per_page: 20,
       ...filters
     };
-    
+
     const queryString = Object.keys(params)
       .map(key => `${key}=${params[key]}`)
       .join('&');
-    
+
     return this.http.get<Product[]>(`${this.apiUrl}/products?${queryString}`)
       .pipe(
         catchError(error => {
@@ -522,47 +519,47 @@ export class ProductService {
     ).pipe(
       catchError(error => {
         console.error('Error fetching featured products from API:', error);
-        
+
         // Check if it's a server connection error (502, 504, etc)
         if (error.status >= 500) {
           console.warn('Server connection error detected for featured products. API server may be unavailable.');
         }
-        
+
         // Check if we're in production mode
         if (this.isProduction) {
           console.log('Production mode: Not providing fallback data for featured products');
           return of([]);
         }
-        
+
         // In development, fall back to random real products
         console.log('Falling back to random real products for featured section (development mode)');
         return this.getRandomProducts(limit);
       })
     );
   }
-  
+
   // Get products by multiple categories
   getProductsByCategories(categoryIds: number[], limit: number = 10): Observable<Product[]> {
     if (!categoryIds || categoryIds.length === 0) {
       return of([]);
     }
-    
+
     // Connect to WooCommerce API using environment variables
     // Join category IDs with commas for the API
     const categoryParam = categoryIds.join(',');
-    
+
     return this.http.get<Product[]>(
       `${this.apiUrl}/products?consumer_key=${this.consumerKey}&consumer_secret=${this.consumerSecret}&category=${categoryParam}&per_page=${limit}`
     ).pipe(
       catchError(error => {
         console.error(`Error fetching products for categories ${categoryParam} from API:`, error);
-        
+
         // Check if we're in production mode
         if (this.isProduction) {
           console.log('Production mode: Not providing fallback data for category products');
           return of([]);
         }
-        
+
         // In development, fall back to random real products
         console.log('Falling back to random real products for category products (development mode)');
         return this.getRandomProducts(limit);
@@ -578,18 +575,18 @@ export class ProductService {
     ).pipe(
       catchError(error => {
         console.error('Error fetching new products from API:', error);
-        
+
         // Check if it's a server connection error (502, 504, etc)
         if (error.status >= 500) {
           console.warn('Server connection error detected for new products. API server may be unavailable.');
         }
-        
+
         // Check if we're in production mode
         if (this.isProduction) {
           console.log('Production mode: Not providing fallback data for new products');
           return of([]);
         }
-        
+
         // In development, fall back to random real products
         console.log('Falling back to random real products for new products section (development mode)');
         return this.getRandomProducts(10);
@@ -605,13 +602,13 @@ export class ProductService {
     ).pipe(
       catchError(error => {
         console.error('Error fetching bestseller products from API:', error);
-        
+
         // Check if we're in production mode
         if (this.isProduction) {
           console.log('Production mode: Not providing fallback data for bestseller products');
           return of([]);
         }
-        
+
         // In development, fall back to random real products
         console.log('Falling back to random real products for bestsellers section (development mode)');
         return this.getRandomProducts(10);
@@ -627,25 +624,25 @@ export class ProductService {
     ).pipe(
       catchError(error => {
         console.error('Error fetching on-sale products from API:', error);
-        
+
         // Check if it's a server connection error (502, 504, etc)
         if (error.status >= 500) {
           console.warn('Server connection error detected for on-sale products. API server may be unavailable.');
         }
-        
+
         // Check if we're in production mode
         if (this.isProduction) {
           console.log('Production mode: Not providing fallback data for on-sale products');
           return of([]);
         }
-        
+
         // In development, fall back to random real products
         console.log('Falling back to random real products for on-sale products section (development mode)');
         return this.getRandomProducts(10);
       })
     );
   }
-  
+
   // Helper method to create a basic category when API fails
   private createBasicCategory(id: number, name: string, slug: string): Category {
     const date = new Date().toISOString();
@@ -672,7 +669,7 @@ export class ProductService {
       }
     };
   }
-  
+
   // Get maximum price available in the store for filter sliders
   getMaxPrice(): Observable<number> {
     // In a real WooCommerce API, we might need to fetch this data differently

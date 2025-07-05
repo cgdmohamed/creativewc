@@ -4,8 +4,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: true,
-  apiUrl: 'wp-json/wc/v3',
+  production: false,
+  apiUrl: 'https://wc.testcceg.com/wp-json/wc/v3',
   storeUrl: 'wc.testcceg.com',
   consumerKey: 'ck_728c9f4fbeb2ee28cedaff5ae57f90c0e466dc26',
   consumerSecret: 'cs_3d34e201f1b256a97da74803cd8da72cbb1a1de5',
